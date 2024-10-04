@@ -1,0 +1,29 @@
+# Ignore build output
+dist
+build
+
+# Ignore Vite's cache
+node_modules
+.vite
+.cache
+
+# Ignore TypeScript build output
+*.d.ts
+*.js
+
+# Ignore test coverage
+coverage
+
+# Ignore environment variables and lock files
+.env
+.env.local
+.env.*.local
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Ignore prettier config file itself
+.prettierignore
+
+# Ignore assets
+public/*
