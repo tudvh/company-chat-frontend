@@ -9,7 +9,6 @@ node_modules
 
 # Ignore TypeScript build output
 *.d.ts
-*.js
 
 # Ignore test coverage
 coverage
