@@ -22,6 +22,10 @@ export const PuhserProvider = (props: LayoutProps) => {
       cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
     })
   }, [])
+
+  console.log({VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY')});
+  console.log({VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER')});
+
   useEffect(() => {
     const channel = pusher.subscribe('toanf')
     channel.bind('toanf', function (data: any) {
