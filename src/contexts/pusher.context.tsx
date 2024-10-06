@@ -43,12 +43,12 @@ export const PuhserProvider = (props: LayoutProps) => {
       }
     }, [])
   } catch (e) {
-    console.log(e)
+    console.warn(e)
   }
 
   const joinChannel = () => {
     const a: number = 1
-    console.log(a)
+    console.warn(a)
   }
 
   const contextValue: TPusherContext = {
