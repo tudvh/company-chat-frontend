@@ -2,6 +2,8 @@ import { LayoutProps } from '@/types'
 import { createContext, useContext, useEffect, useMemo } from 'react'
 import Pusher from 'pusher-js'
 import { getEnv } from '@/helpers'
+import { ToastUtil } from '@/utils'
+ToastUtil.success('mới dô context');
 
 type TPusherContext = {}
 
@@ -17,21 +19,21 @@ export const usePusher = (): TPusherContext => {
 
 export const PuhserProvider = (props: LayoutProps) => {
   const { children } = props
-  console.log('vao day')
+  console.warn('vao day')
   try {
     const pusher = useMemo(() => {
       return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
         cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
       })
     }, [])
-
-    console.log({ VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY') })
-    console.log({ VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER') })
+    console.warn({ VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY') })
+    console.warn({ VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER') })
 
     useEffect(() => {
       const channel = pusher.subscribe('toanf')
       channel.bind('toanf', function (data: any) {
-        console.log(JSON.stringify(data))
+        console.warn(JSON.stringify(data))
+        ToastUtil.success(JSON.stringify(data))
       })
 
       return () => {
