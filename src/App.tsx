@@ -2,7 +2,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Suspense } from 'react'
 
 import { LoadingOverlay } from './components/ui'
-import { AuthProvider, LoadingProvider } from './contexts'
+import { AuthProvider, LoadingProvider, PuhserProvider } from './contexts'
 import { getEnv } from './helpers'
 import Routes from './routes'
 
@@ -11,9 +11,11 @@ function App() {
     <GoogleOAuthProvider clientId={getEnv('VITE_GOOGLE_CLIENT_ID')}>
       <LoadingProvider>
         <AuthProvider>
-          <Suspense fallback={<LoadingOverlay open />}>
-            <Routes />
-          </Suspense>
+          <PuhserProvider>
+            <Suspense fallback={<LoadingOverlay open />}>
+              <Routes />
+            </Suspense>
+          </PuhserProvider>
         </AuthProvider>
       </LoadingProvider>
     </GoogleOAuthProvider>
