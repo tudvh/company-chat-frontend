@@ -3,9 +3,11 @@ import { createContext, useContext, useEffect, useMemo } from 'react'
 import Pusher from 'pusher-js'
 import { getEnv } from '@/helpers'
 import { ToastUtil } from '@/utils'
-ToastUtil.success('mới dô context');
+ToastUtil.success('mới dô context')
 
-type TPusherContext = {}
+type TPusherContext = {
+  joinChannel: () => void
+}
 
 const PusherContext = createContext<TPusherContext | undefined>(undefined)
 
@@ -44,7 +46,14 @@ export const PuhserProvider = (props: LayoutProps) => {
     console.log(e)
   }
 
-  const contextValue: TPusherContext = {}
+  const joinChannel = () => {
+    const a: number = 1
+    console.log(a)
+  }
+
+  const contextValue: TPusherContext = {
+    joinChannel,
+  }
 
   return <PusherContext.Provider value={contextValue}>{children}</PusherContext.Provider>
 }
