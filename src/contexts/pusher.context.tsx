@@ -17,25 +17,30 @@ export const usePusher = (): TPusherContext => {
 
 export const PuhserProvider = (props: LayoutProps) => {
   const { children } = props
-  const pusher = useMemo(() => {
-    return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
-      cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
-    })
-  }, [])
+  console.log('vao day')
+  try {
+    const pusher = useMemo(() => {
+      return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
+        cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
+      })
+    }, [])
 
-  console.log({VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY')});
-  console.log({VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER')});
+    console.log({ VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY') })
+    console.log({ VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER') })
 
-  useEffect(() => {
-    const channel = pusher.subscribe('toanf')
-    channel.bind('toanf', function (data: any) {
-      console.log(JSON.stringify(data))
-    })
+    useEffect(() => {
+      const channel = pusher.subscribe('toanf')
+      channel.bind('toanf', function (data: any) {
+        console.log(JSON.stringify(data))
+      })
 
-    return () => {
-      pusher.unsubscribe('toanf')
-    }
-  }, [])
+      return () => {
+        pusher.unsubscribe('toanf')
+      }
+    }, [])
+  } catch (e) {
+    console.log(e)
+  }
 
   const contextValue: TPusherContext = {}
 
