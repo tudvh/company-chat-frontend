@@ -5,14 +5,14 @@ import { ROUTES } from '@/configs'
 import { useAuth } from '@/contexts'
 
 export const AuthLayout = () => {
-  const { isAuth } = useAuth()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isAuth) {
+    if (isAuthenticated) {
       navigate(ROUTES.HOME)
     }
-  }, [isAuth])
+  }, [isAuthenticated])
 
   return (
     <div className="h-dvh w-dvw md:grid md:grid-cols-2">

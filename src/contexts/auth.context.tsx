@@ -6,17 +6,17 @@ import { AuthService } from '@/services/api'
 import { AuthWithGooglePayload, LayoutProps, LoginPayload, TUserProfile } from '@/types'
 import { LocalStorageUtil } from '@/utils'
 
-type TAuthContext = {
-  isAuth: boolean
+type AuthContextType = {
+  isAuthenticated: boolean
   userProfile: TUserProfile | null
-  login: (payloads: LoginPayload) => Promise<void>
-  authWithGoogle: (payloads: AuthWithGooglePayload) => Promise<void>
-  logout: () => void
+  loginUser: (payload: LoginPayload) => Promise<void>
+  authenticateWithGoogle: (payload: AuthWithGooglePayload) => Promise<void>
+  logoutUser: () => void
 }
 
-const AuthContext = createContext<TAuthContext | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const useAuth = (): TAuthContext => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
@@ -24,63 +24,62 @@ export const useAuth = (): TAuthContext => {
   return context
 }
 
-export const AuthProvider = (props: LayoutProps) => {
-  const { children } = props
-  const [isAuth, setIsAuth] = useState<boolean | undefined>(undefined)
+export const AuthProvider = ({ children }: LayoutProps) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined)
   const [userProfile, setUserProfile] = useState<TUserProfile | null | undefined>(undefined)
 
-  const login = async (payloads: LoginPayload): Promise<void> => {
-    const data = await AuthService.login(payloads)
+  const loginUser = async (payload: LoginPayload): Promise<void> => {
+    const data = await AuthService.login(payload)
     setTokenToStorage(data)
-    setIsAuth(true)
+    setIsAuthenticated(true)
     setUserProfile(data.userProfile)
   }
 
-  const authWithGoogle = async (payloads: AuthWithGooglePayload): Promise<void> => {
-    const data = await AuthService.authWithGoogle(payloads)
+  const authenticateWithGoogle = async (payload: AuthWithGooglePayload): Promise<void> => {
+    const data = await AuthService.authWithGoogle(payload)
     setTokenToStorage(data)
-    setIsAuth(true)
+    setIsAuthenticated(true)
     setUserProfile(data.userProfile)
   }
 
-  const logout = (): void => {
-    setIsAuth(false)
+  const logoutUser = (): void => {
+    setIsAuthenticated(false)
   }
 
-  const getProfile = async (): Promise<void> => {
+  const fetchUserProfile = async (): Promise<void> => {
     try {
       const data = await AuthService.getProfile()
       setUserProfile(data)
-    } catch (err: any) {
+    } catch (error: any) {
       setUserProfile(null)
-      displayError(err)
+      displayError(error)
     }
   }
 
   useEffect(() => {
     const accessToken = LocalStorageUtil.getValue('access_token')
-    setIsAuth(!!accessToken)
+    setIsAuthenticated(!!accessToken)
   }, [])
 
   useEffect(() => {
-    if (isAuth === false) {
+    if (isAuthenticated === false) {
       setUserProfile(null)
       LocalStorageUtil.removeValue('access_token')
-    } else if (isAuth && !userProfile) {
-      getProfile()
+    } else if (isAuthenticated && userProfile === undefined) {
+      fetchUserProfile()
     }
-  }, [isAuth, userProfile])
+  }, [isAuthenticated, userProfile])
 
-  if (isAuth === undefined || userProfile === undefined) {
+  if (isAuthenticated === undefined || userProfile === undefined) {
     return <LoadingOverlay open />
   }
 
-  const contextValue: TAuthContext = {
-    isAuth,
+  const contextValue: AuthContextType = {
+    isAuthenticated,
     userProfile,
-    login,
-    authWithGoogle,
-    logout,
+    loginUser,
+    authenticateWithGoogle,
+    logoutUser,
   }
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>

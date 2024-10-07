@@ -3,53 +3,46 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { LoadingOverlay } from '@/components/ui'
 import { LayoutProps } from '@/types'
 
-type TLoadingContext = {
-  isLoading: boolean | undefined
-  openLoading: () => void
-  closeLoading: () => void
+type LoadingContextType = {
+  isShowLoading: boolean
+  showLoading: () => void
+  hideLoading: () => void
 }
 
-const LoadingContext = createContext<TLoadingContext | undefined>(undefined)
+const LoadingContext = createContext<LoadingContextType | undefined>(undefined)
 
-export const useLoading = (): TLoadingContext => {
+export const useLoading = (): LoadingContextType => {
   const context = useContext(LoadingContext)
   if (context === undefined) {
-    throw new Error('useLoading must be used within an LoadingProvider')
+    throw new Error('useLoading must be used within a LoadingProvider')
   }
   return context
 }
 
-export const LoadingProvider = (props: LayoutProps) => {
-  const { children } = props
-  const [isLoading, setIsLoading] = useState(false)
-  const htmlRef = useRef<HTMLHtmlElement | null>(null)
+export const LoadingProvider = ({ children }: LayoutProps) => {
+  const [isShowLoading, setIsShowLoading] = useState(false)
+  const htmlElementRef = useRef<HTMLHtmlElement>(document.querySelector('html'))
 
-  const valueLoading = useMemo(
+  const loadingContextValue = useMemo(
     () => ({
-      isLoading,
-      openLoading: () => setIsLoading(true),
-      closeLoading: () => setIsLoading(false),
+      isShowLoading,
+      showLoading: () => setIsShowLoading(true),
+      hideLoading: () => setIsShowLoading(false),
     }),
-    [isLoading],
+    [isShowLoading],
   )
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      htmlRef.current = document.querySelector('html')
+    if (htmlElementRef.current) {
+      htmlElementRef.current.style.pointerEvents = isShowLoading ? 'none' : 'auto'
+      htmlElementRef.current.style.userSelect = isShowLoading ? 'none' : 'auto'
     }
-  }, [])
-
-  useEffect(() => {
-    if (htmlRef.current) {
-      htmlRef.current.style.pointerEvents = isLoading ? 'none' : 'auto'
-      htmlRef.current.style.userSelect = isLoading ? 'none' : 'auto'
-    }
-  }, [isLoading])
+  }, [isShowLoading])
 
   return (
-    <LoadingContext.Provider value={valueLoading}>
+    <LoadingContext.Provider value={loadingContextValue}>
       {children}
-      <LoadingOverlay open={isLoading} />
+      <LoadingOverlay open={isShowLoading} />
     </LoadingContext.Provider>
   )
 }
