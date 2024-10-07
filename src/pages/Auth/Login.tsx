@@ -2,6 +2,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { GoogleIcon } from '@/components/icons'
 import {
   Button,
   Checkbox,
@@ -18,7 +19,6 @@ import { useAuth, useLoading } from '@/contexts'
 import { displayError } from '@/helpers'
 import { loginSchema } from '@/schema'
 import { TLoginSchema } from '@/types'
-import { GoogleIcon } from '@/components/icons'
 import { useGoogleLogin } from '@react-oauth/google'
 
 const defaultValues = {
@@ -27,8 +27,8 @@ const defaultValues = {
 }
 
 export const LoginPage = () => {
-  const { login, authWithGoogle } = useAuth()
-  const { openLoading, closeLoading } = useLoading()
+  const { loginUser, authenticateWithGoogle } = useAuth()
+  const { showLoading, hideLoading } = useLoading()
   const [isShowPassword, setIsShowPassword] = useState(false)
 
   const form = useForm<TLoginSchema>({
@@ -40,26 +40,26 @@ export const LoginPage = () => {
 
   const onSubmit = async (values: TLoginSchema) => {
     try {
-      openLoading()
-      await login(values)
+      showLoading()
+      await loginUser(values)
     } catch (err: any) {
       displayError(err)
     } finally {
-      closeLoading()
+      hideLoading()
     }
   }
 
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async tokenResponse => {
       try {
-        openLoading()
-        await authWithGoogle({
+        showLoading()
+        await authenticateWithGoogle({
           accessToken: tokenResponse.access_token,
         })
       } catch (err: any) {
         displayError(err)
       } finally {
-        closeLoading()
+        hideLoading()
       }
     },
     onError: errorResponse => {

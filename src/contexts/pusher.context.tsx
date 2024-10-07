@@ -1,58 +1,70 @@
-import { LayoutProps } from '@/types'
-import { createContext, useContext, useEffect, useMemo } from 'react'
-import Pusher from 'pusher-js'
-import { getEnv } from '@/helpers'
-import { ToastUtil } from '@/utils'
-ToastUtil.success('mới dô context')
+import Pusher, { Channel } from 'pusher-js'
+import { createContext, useContext, useMemo, useState } from 'react'
 
-type TPusherContext = {
-  joinChannel: () => void
+import { getEnv } from '@/helpers'
+import { LayoutProps } from '@/types'
+
+type PusherContextType = {
+  subscribeToChannel: (channelName: string) => void
+  bindEventToChannel: (
+    channelName: string,
+    eventName: string,
+    callback: (data: any) => void,
+  ) => void
+  unsubscribeFromChannel: (channelName: string) => void
 }
 
-const PusherContext = createContext<TPusherContext | undefined>(undefined)
+const PusherContext = createContext<PusherContextType | undefined>(undefined)
 
-export const usePusher = (): TPusherContext => {
+export const usePusher = (): PusherContextType => {
   const context = useContext(PusherContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('usePusher must be used within a PusherProvider')
   }
   return context
 }
 
-export const PuhserProvider = (props: LayoutProps) => {
-  const { children } = props
-  console.warn('vao day')
-  try {
-    const pusher = useMemo(() => {
-      return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
-        cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
-      })
-    }, [])
-    console.warn({ VITE_PUSHER_APP_KEY: getEnv('VITE_PUSHER_APP_KEY') })
-    console.warn({ VITE_PUSHER_APP_CLUSTER: getEnv('VITE_PUSHER_APP_CLUSTER') })
+export const PusherProvider = ({ children }: LayoutProps) => {
+  const [channels, setChannels] = useState<Channel[]>([])
 
-    useEffect(() => {
-      const channel = pusher.subscribe('toanf')
-      channel.bind('toanf', function (data: any) {
-        console.warn(JSON.stringify(data))
-        ToastUtil.success(JSON.stringify(data))
-      })
+  const pusherInstance: Pusher = useMemo(() => {
+    return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
+      cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
+    })
+  }, [])
 
-      return () => {
-        pusher.unsubscribe('toanf')
-      }
-    }, [])
-  } catch (e) {
-    console.warn(e)
+  const subscribeToChannel = (channelName: string): void => {
+    const newChannel = pusherInstance.subscribe(channelName)
+    setChannels(prevChannels => [...prevChannels, newChannel])
   }
 
-  const joinChannel = () => {
-    const a: number = 1
-    console.warn(a)
+  const getChannel = (channelName: string): Channel => {
+    const channel = channels.find(channel => {
+      return channel.name === channelName
+    })
+    if (!channel) {
+      throw new Error(`Channel not found: ${channelName}`)
+    }
+    return channel
   }
 
-  const contextValue: TPusherContext = {
-    joinChannel,
+  const unsubscribeFromChannel = (channelName: string): void => {
+    pusherInstance.unsubscribe(channelName)
+  }
+
+  const bindEventToChannel = (
+    channelName: string,
+    eventName: string,
+    callback: (data: any) => void,
+  ): void => {
+    const channel = getChannel(channelName)
+    channel.bind(eventName, callback)
+  }
+
+  const contextValue: PusherContextType = {
+    subscribeToChannel,
+    bindEventToChannel,
+    unsubscribeFromChannel,
   }
 
   return <PusherContext.Provider value={contextValue}>{children}</PusherContext.Provider>
