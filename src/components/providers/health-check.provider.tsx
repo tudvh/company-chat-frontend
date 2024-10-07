@@ -12,7 +12,7 @@ export const HealthCheckProvider = ({ children }: LayoutProps) => {
     try {
       await HealthCheckService.checkHealth()
       setIsOk(true)
-    } catch (error) {
+    } catch {
       setIsOk(false)
     }
   }
