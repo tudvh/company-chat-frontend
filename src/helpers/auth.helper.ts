@@ -33,11 +33,14 @@ export const setTokenToStorage = (data: LoginResponse): void => {
 }
 
 export const removeTokenFormStorage = (): void => {
-  ;['access_token', 'refresh_token', 'access_token_expires_time', 'refresh_token_expires_time'].forEach(
-    key => {
-      LocalStorageUtil.removeValue(key)
-    },
-  )
+  ;[
+    'access_token',
+    'refresh_token',
+    'access_token_expires_time',
+    'refresh_token_expires_time',
+  ].forEach(key => {
+    LocalStorageUtil.removeValue(key)
+  })
 }
 
 export const refreshAccessToken = async (refreshToken: string): Promise<string> => {

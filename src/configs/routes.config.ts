@@ -3,4 +3,5 @@ export const ROUTES = {
     LOGIN: '/auth/login',
   },
   HOME: '/',
+  ROOM: '/call1',
 }
