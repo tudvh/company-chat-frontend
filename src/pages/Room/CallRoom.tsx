@@ -1,12 +1,16 @@
 import {
   LocalUser,
+  LocalVideoTrack,
   RemoteUser,
   useIsConnected,
   useJoin,
   useLocalCameraTrack,
   useLocalMicrophoneTrack,
+  useLocalScreenTrack,
   usePublish,
   useRemoteUsers,
+  useRemoteVideoTracks,
+  useRTCScreenShareClient,
 } from 'agora-rtc-react'
 import { Mic, MicOff, MonitorUp, Phone, PhoneOff, Video, VideoOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -23,16 +27,20 @@ export const CallRoomPage = () => {
   const [isMicOn, setIsMicOn] = useState(true)
   const [isCameraOn, setIsCameraOn] = useState(false)
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(isMicOn)
+  const { screenTrack, error } = useLocalScreenTrack(true,{
+    encoderConfig:"1080p_2",
+  },"disable")
   const { localCameraTrack } = useLocalCameraTrack(isCameraOn)
   const channel = 'main'
   const isConnected = useIsConnected()
   const remoteUsers = useRemoteUsers()
 
+
   const myProfile = useJoin(
     { appid: getEnv('VITE_AGORA_APP_ID'), channel, token: token || null },
     calling,
   )
-  usePublish([localMicrophoneTrack, localCameraTrack])
+  usePublish([localMicrophoneTrack, localCameraTrack, screenTrack])
 
   const createCallToken = async () => {
     try {
@@ -46,6 +54,15 @@ export const CallRoomPage = () => {
       hideLoading()
     }
   }
+  useEffect(()=>{
+    console.log({error})
+  },[error])
+ 
+  useEffect(()=>{
+    console.log({error})
+    console.log({myProfile})
+    console.log({remoteUsers})
+  },[remoteUsers])
 
   useEffect(() => {
     createCallToken()
@@ -63,13 +80,17 @@ export const CallRoomPage = () => {
             <div className="h-fit space-y-5 text-center">
               <div className="aspect-video w-[300px] overflow-hidden rounded-xl shadow">
                 <LocalUser
-                  audioTrack={localMicrophoneTrack}
+                  playAudio={false}
                   cameraOn={isCameraOn}
                   micOn={isMicOn}
-                  videoTrack={localCameraTrack}
-                  cover="https://bing.biturl.top?resolution=1366&format=image&index=random"
+                  // videoTrack={screenTrack} 
+                  // playVideo
+                  
+                  cover="https://images2.thanhnien.vn/528068263637045248/2023/4/23/edit-truc-anh-16822518118551137084698.png"
                 />
+                <h1>ss</h1>
               </div>
+                <LocalVideoTrack play style={{ width: "300px", height: "300px" }} track={screenTrack} />
               <p>{myProfile.data}</p>
             </div>
             {remoteUsers.map(user => (
@@ -78,6 +99,7 @@ export const CallRoomPage = () => {
                   <RemoteUser
                     cover="https://bing.biturl.top?resolution=1366&format=image&index=random"
                     user={user}
+                    
                   />
                 </div>
                 <p>{user.uid}</p>

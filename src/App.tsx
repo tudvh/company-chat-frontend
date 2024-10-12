@@ -1,5 +1,5 @@
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import AgoraRTC, { AgoraRTCProvider } from 'agora-rtc-react'
+import AgoraRTC, { AgoraRTCProvider, AgoraRTCScreenShareProvider } from 'agora-rtc-react'
 import { Suspense } from 'react'
 
 import { HealthCheckProvider } from './components/providers'
@@ -10,18 +10,20 @@ import Routes from './routes'
 
 function App() {
   const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' })
-
+  // <AgoraRTCScreenShareProvider client={client}>{children}</AgoraRTCScreenShareProvider>
   return (
     <HealthCheckProvider>
       <GoogleOAuthProvider clientId={getEnv('VITE_GOOGLE_CLIENT_ID')}>
         <LoadingProvider>
           <AuthProvider>
             <PusherProvider>
-              <AgoraRTCProvider client={client}>
-                <Suspense fallback={<LoadingOverlay open />}>
-                  <Routes />
-                </Suspense>
-              </AgoraRTCProvider>
+              <AgoraRTCScreenShareProvider client={client}>
+                <AgoraRTCProvider client={client}>
+                  <Suspense fallback={<LoadingOverlay open />}>
+                    <Routes />
+                  </Suspense>
+                </AgoraRTCProvider>
+              </AgoraRTCScreenShareProvider>
             </PusherProvider>
           </AuthProvider>
         </LoadingProvider>
