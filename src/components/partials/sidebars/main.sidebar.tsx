@@ -1,42 +1,14 @@
 import { ChevronDown, ChevronRight, Volume2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { AppLogo } from '@/assets/images'
 import { SharpIcon } from '@/components/icons/sharp.icon'
-import { ROUTES } from '@/configs'
+import { ChannelList } from './components'
 
 export const MainSidebar = () => {
   return (
     <aside className="flex h-dvh w-[300px] select-none">
-      <div className="flex h-full flex-col gap-3 bg-primary/10 p-2">
-        <Link
-          to={ROUTES.HOME}
-          className="size-12 overflow-hidden rounded-full bg-background p-2 transition duration-200 hover:rounded-xl active:translate-y-1"
-        >
-          <img src={AppLogo} className="aspect-square size-full object-cover" alt="" />
-        </Link>
-        <div className="h-1 w-full rounded-full bg-background" />
-        <Link
-          to="#"
-          className="size-12 overflow-hidden rounded-full bg-background transition duration-200 hover:rounded-xl active:translate-y-1"
-        >
-          <img
-            src="https://bing.biturl.top?resolution=1366&format=image&index=random"
-            className="aspect-square size-full object-cover"
-            alt=""
-          />
-        </Link>
-        <Link
-          to="#"
-          className="size-12 overflow-hidden rounded-full bg-background transition duration-200 hover:rounded-xl active:translate-y-1"
-        >
-          <img
-            src="https://bing.biturl.top?resolution=1366&format=image&index=random"
-            className="aspect-square size-full object-cover"
-            alt=""
-          />
-        </Link>
-      </div>
+      <ChannelList />
+
       <div className="flex h-full flex-1 flex-col bg-primary/5">
         <button
           className="flex h-12 w-full items-center justify-between gap-3 border-b px-4 font-bold"

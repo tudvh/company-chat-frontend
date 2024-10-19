@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+import { getEnv } from '@/helpers'
 import {
   AuthWithGooglePayload,
   LoginPayload,
@@ -8,7 +9,6 @@ import {
   TUserProfile,
 } from '@/types'
 import apiClient from './api-client'
-import { getEnv } from '@/helpers'
 
 const path = '/auth'
 

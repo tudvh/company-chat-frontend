@@ -24,13 +24,12 @@ export type RefreshAccessTokenPayload = {
 
 export type TUserProfile = {
   id: string
-  firstName: string
-  lastName: string
-  dob: string
-  gender: number
-  phoneNumber: string
-  avatarPublicId: string
-  avatarUrl: string
+  fullName: string
+  dob: string | null
+  gender: number | null
+  phoneNumber: string | null
+  avatarPublicId: string | null
+  avatarUrl: string | null
   email: string
   googleId: string
   type: number

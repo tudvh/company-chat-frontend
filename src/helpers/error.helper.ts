@@ -1,9 +1,8 @@
 import { UseFormSetError } from 'react-hook-form'
 
-import { TApiResponseError } from '@/types'
 import { ToastUtil } from '@/utils'
 
-export const displayError = (error: TApiResponseError): void => {
+export const displayError = (error: any): void => {
   try {
     let errorMessage: string
     if (Array.isArray(error.response?.data?.message)) {
