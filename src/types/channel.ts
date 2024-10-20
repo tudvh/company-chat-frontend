@@ -1,17 +1,17 @@
 import { yup } from '@/configs'
 import { createChannelSchema } from '@/schema'
-import { TGroup } from './group'
+import { TGroupDetail } from './group'
 
 export type TChannel = {
   id: string
   name: string
-  description: string
-  thumbnailUrl: string
+  description: string | null
+  thumbnailUrl: string | null
   createdAt: string
 }
 
 export type TChannelDetail = TChannel & {
-  groups: TGroup[]
+  groups: TGroupDetail[]
 }
 
 export type TCreateChannelSchema = yup.InferType<typeof createChannelSchema>

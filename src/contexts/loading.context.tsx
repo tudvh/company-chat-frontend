@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 
 import { LoadingOverlay } from '@/components/ui'
 import { LayoutProps } from '@/types'
@@ -21,7 +21,6 @@ export const useLoading = (): LoadingContextType => {
 
 export const LoadingProvider = ({ children }: LayoutProps) => {
   const [isShowLoading, setIsShowLoading] = useState(false)
-  const htmlElementRef = useRef<HTMLHtmlElement>(document.querySelector('html'))
 
   const loadingContextValue = useMemo(
     () => ({
@@ -31,13 +30,6 @@ export const LoadingProvider = ({ children }: LayoutProps) => {
     }),
     [isShowLoading],
   )
-
-  useEffect(() => {
-    if (htmlElementRef.current) {
-      htmlElementRef.current.style.pointerEvents = isShowLoading ? 'none' : 'auto'
-      htmlElementRef.current.style.userSelect = isShowLoading ? 'none' : 'auto'
-    }
-  }, [isShowLoading])
 
   return (
     <LoadingContext.Provider value={loadingContextValue}>
