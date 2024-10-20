@@ -1,7 +1,7 @@
 import { ROUTES } from '@/configs'
 
 import { AuthLayout, MainLayout } from '@/components/layouts'
-import { HomePage, RoomPage } from '@/pages'
+import { ChannelPage, HomePage, RoomPage } from '@/pages'
 import { LoginPage } from '@/pages/Auth'
 
 const clientRoute = [
@@ -11,6 +11,10 @@ const clientRoute = [
       {
         path: ROUTES.HOME,
         element: <HomePage />,
+      },
+      {
+        path: ROUTES.CHANNEL,
+        element: <ChannelPage />,
       },
       {
         path: ROUTES.ROOM,

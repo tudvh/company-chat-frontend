@@ -3,5 +3,6 @@ export const ROUTES = {
     LOGIN: '/auth/login',
   },
   HOME: '/',
-  ROOM: '/call1',
+  CHANNEL: '/channels/:channelId',
+  ROOM: '/channels/:channelId/:roomId',
 }
