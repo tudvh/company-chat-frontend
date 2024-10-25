@@ -3,23 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { ROUTES } from '@/configs'
 import { displayError, getDefaultRoomId } from '@/helpers'
-import { useMyChannelDetail } from '@/hooks'
+import { useJointedChannelDetail } from '@/hooks'
 
 export const ChannelPage = () => {
   const { channelId } = useParams()
-  const { data: myChannelDetail, error: myChannelDetailError } = useMyChannelDetail(channelId)
+  const { data: jointedChannelDetail, error: myChannelDetailError } =
+    useJointedChannelDetail(channelId)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (channelId && myChannelDetail) {
-      const roomId = getDefaultRoomId(myChannelDetail)
+    if (channelId && jointedChannelDetail) {
+      const roomId = getDefaultRoomId(jointedChannelDetail)
       if (!roomId) {
         navigate(ROUTES.HOME)
         return
       }
       navigate(ROUTES.ROOM.replace(':channelId', channelId).replace(':roomId', roomId))
     }
-  }, [channelId, myChannelDetail])
+  }, [channelId, jointedChannelDetail])
 
   useEffect(() => {
     if (myChannelDetailError) {
