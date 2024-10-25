@@ -7,14 +7,14 @@ import { AppDialog, AppTooltip } from '@/components/ui'
 import { ROUTES } from '@/configs'
 import { useAuth } from '@/contexts'
 import { displayError } from '@/helpers'
-import { useMyChannels } from '@/hooks'
+import { useJointedChannels } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { ChannelCreate } from './channel-create'
 
 export const ChannelList = () => {
   const { userProfile } = useAuth()
   const { channelId } = useParams()
-  const { data: myChannels, error: myChannelsError } = useMyChannels(userProfile?.id)
+  const { data: jointedChannels, error: myChannelsError } = useJointedChannels(userProfile?.id)
   const [isModalOpen, setModalOpen] = useState(false)
   const location = useLocation()
   const pathName = location.pathname
@@ -27,8 +27,8 @@ export const ChannelList = () => {
   }, [myChannelsError])
 
   return (
-    <div className="thread-scroll h-full overflow-y-auto bg-primary/10 py-3 pr-2">
-      <div className="flex flex-col gap-3 overflow-hidden">
+    <div className="thread-scroll h-full overflow-y-auto bg-primary/10 pr-2">
+      <div className="flex flex-col gap-3 overflow-hidden py-3">
         {/* Home button */}
         <div className="flex gap-1.5">
           <div
@@ -48,15 +48,15 @@ export const ChannelList = () => {
         </div>
         <div className="ml-3 h-0.5 w-full rounded-full bg-primary" />
         {/* List of channels */}
-        {myChannels?.map(channel => (
-          <div className="flex gap-1.5">
+        {jointedChannels?.map(channel => (
+          <div className="flex gap-1.5" key={channel.id}>
             <div
               className={cn(
                 'h-12 w-1 rounded-br-lg rounded-tr-lg',
                 channelId === channel.id ? 'bg-primary' : 'bg-transparent',
               )}
             />
-            <AppTooltip key={channel.id} position="right" content={channel.name} asChild>
+            <AppTooltip position="right" content={channel.name} asChild>
               <Link
                 to={ROUTES.CHANNEL.replace(':channelId', channel.id)}
                 className="size-12 overflow-hidden rounded-full transition duration-200 hover:rounded-xl active:translate-y-0.5"

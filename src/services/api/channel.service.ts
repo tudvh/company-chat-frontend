@@ -4,8 +4,8 @@ import apiClient from './api-client'
 const path = '/channels'
 
 export class ChannelService {
-  public static async getMyChannels(): Promise<TChannel[]> {
-    const { data } = await apiClient.get(`${path}/my-channels`)
+  public static async getJointedChannels(): Promise<TChannel[]> {
+    const { data } = await apiClient.get(`${path}/jointed`)
     return data
   }
 
@@ -18,8 +18,8 @@ export class ChannelService {
     return data
   }
 
-  public static async getMyChannelDetail(channelId: string): Promise<TChannelDetail> {
-    const { data } = await apiClient.get(`${path}/${channelId}`)
+  public static async getJointedChannelDetail(channelId: string): Promise<TChannelDetail> {
+    const { data } = await apiClient.get(`${path}/jointed/${channelId}`)
     return data
   }
 }
