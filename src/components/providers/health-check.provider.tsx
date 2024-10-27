@@ -6,7 +6,7 @@ import { InternalServerErrorPage } from '../partials/error'
 import { LoadingOverlay } from '../ui'
 
 export const HealthCheckProvider = ({ children }: LayoutProps) => {
-  const [isOk, setIsOk] = useState<boolean | undefined>(undefined)
+  const [isOk, setIsOk] = useState<boolean>()
 
   const checkHealth = async () => {
     try {

@@ -7,7 +7,7 @@ export class AlertUtil {
   private static MySwal = withReactContent(Swal)
 
   public static alert(params: AlertParams): void {
-    const { title, text, icon = 'question' } = params
+    const { title, text, icon = 'info' } = params
 
     this.MySwal.fire({
       title,

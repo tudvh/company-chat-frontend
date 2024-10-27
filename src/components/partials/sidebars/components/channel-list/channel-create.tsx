@@ -18,7 +18,7 @@ import {
 import { ROUTES } from '@/configs'
 import { useAuth, useLoading } from '@/contexts'
 import { displayError, getDefaultRoomId } from '@/helpers'
-import { useJointedChannelDetail, useJointedChannels } from '@/hooks'
+import { useChannelDetail, useChannels } from '@/hooks'
 import { createChannelSchema } from '@/schema'
 import { ChannelService } from '@/services/api'
 import { CreateChannelPayload, TChannelDetail, TCreateChannelSchema } from '@/types'
@@ -36,8 +36,8 @@ const defaultValues = {
 export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
   const { userProfile } = useAuth()
   const { showLoading, hideLoading } = useLoading()
-  const { setData: setJointedChannelData } = useJointedChannels(userProfile?.id)
-  const { setData: setJointedChannelDetailData } = useJointedChannelDetail()
+  const { prependChannel } = useChannels(userProfile?.id)
+  const { updateChannelDetail } = useChannelDetail()
   const [thumbnailUrlPreview, setThumbnailUrlPreview] = useState<string | null>(null)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const navigate = useNavigate()
@@ -66,8 +66,8 @@ export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
     onMutate: () => showLoading(),
     onSuccess: (newChannel: TChannelDetail) => {
       ToastUtil.success('Tạo máy chủ thành công')
-      setJointedChannelData(newChannel)
-      setJointedChannelDetailData(newChannel)
+      prependChannel(newChannel)
+      updateChannelDetail(newChannel)
       const channelId = newChannel.id
       const roomId = getDefaultRoomId(newChannel)
       if (channelId && roomId) {

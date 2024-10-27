@@ -2,6 +2,7 @@ import axios from 'axios'
 
 import { getEnv } from '@/helpers'
 import {
+  AuthTokenResponse,
   AuthWithGooglePayload,
   LoginPayload,
   LoginResponse,
@@ -30,7 +31,7 @@ export class AuthService {
 
   public static async refreshAccessToken(
     payloads: RefreshAccessTokenPayload,
-  ): Promise<LoginResponse> {
+  ): Promise<AuthTokenResponse> {
     const { data } = await axios.post(`${getEnv('VITE_APP_API_URL')}${path}/refresh`, payloads)
     return data
   }

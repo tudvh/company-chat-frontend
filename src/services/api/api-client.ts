@@ -1,12 +1,7 @@
 import axios, { HttpStatusCode, InternalAxiosRequestConfig } from 'axios'
 
-import {
-  getEnv,
-  getTokenFromStorage,
-  isTokenExpired,
-  refreshAccessToken,
-  removeTokenFormStorage,
-} from '@/helpers'
+import { getEnv } from '@/helpers'
+import { AuthTokenUtil } from '@/utils'
 
 const apiClient = axios.create({
   baseURL: getEnv('VITE_APP_API_URL'),
@@ -15,22 +10,25 @@ const apiClient = axios.create({
   },
 })
 
-const setAuthorizationHeader = (config: InternalAxiosRequestConfig<any>, token: string): void => {
+const setAuthorizationHeader = (config: InternalAxiosRequestConfig, token: string): void => {
   config.headers['Authorization'] = `Bearer ${token}`
 }
 
-const handleTokenRefresh = async (config: InternalAxiosRequestConfig<any>): Promise<string> => {
+const handleTokenRefresh = async (): Promise<string> => {
   try {
-    const { refreshToken, refreshTokenExpiresTime } = getTokenFromStorage()
-    if (refreshToken && refreshTokenExpiresTime && !isTokenExpired(refreshTokenExpiresTime)) {
-      const newToken = await refreshAccessToken(refreshToken)
-      setAuthorizationHeader(config, newToken)
+    const { refreshToken, refreshTokenExpiration } = AuthTokenUtil.retrieveTokenData()
+    if (
+      refreshToken &&
+      refreshTokenExpiration &&
+      !AuthTokenUtil.isTokenExpired(refreshTokenExpiration)
+    ) {
+      const newToken = await AuthTokenUtil.refreshAccessToken(refreshToken)
       return newToken
     } else {
       throw new Error('Token refresh failed')
     }
   } catch (err) {
-    removeTokenFormStorage()
+    AuthTokenUtil.clearTokenData()
     window.location.href = '/auth/login'
     throw err
   }
@@ -38,10 +36,12 @@ const handleTokenRefresh = async (config: InternalAxiosRequestConfig<any>): Prom
 
 apiClient.interceptors.request.use(
   async config => {
-    const { accessToken, accessTokenExpiresTime } = getTokenFromStorage()
-    if (accessToken && accessTokenExpiresTime && isTokenExpired(accessTokenExpiresTime)) {
-      await handleTokenRefresh(config)
-    } else if (accessToken) {
+    const { accessToken, accessTokenExpiration } = AuthTokenUtil.retrieveTokenData()
+    if (!accessToken) return config
+    if (accessTokenExpiration && AuthTokenUtil.isTokenExpired(accessTokenExpiration)) {
+      const newToken = await handleTokenRefresh()
+      setAuthorizationHeader(config, newToken)
+    } else {
       setAuthorizationHeader(config, accessToken)
     }
     return config
@@ -52,18 +52,12 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   response => response,
   async error => {
-    const status = error?.response?.status
-    const originalRequest = error.config
-    if (status === HttpStatusCode.Unauthorized) {
-      try {
-        const newToken = await handleTokenRefresh(originalRequest)
-        setAuthorizationHeader(originalRequest, newToken)
-        return apiClient(originalRequest)
-      } catch (err) {
-        return Promise.reject(err)
-      }
+    if (error.response?.status === HttpStatusCode.Unauthorized) {
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+    const newToken = await handleTokenRefresh()
+    setAuthorizationHeader(error.config, newToken)
+    return apiClient(error.config)
   },
 )
 

@@ -7,3 +7,8 @@ export type TRoom = {
   isPrivate: boolean
   createdAt: string
 }
+
+export type TCallInfo = {
+  channel: string
+  rtcToken: string
+}

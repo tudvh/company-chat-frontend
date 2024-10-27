@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 import { LoadingOverlay } from '@/components/ui'
-import { displayError, setTokenToStorage } from '@/helpers'
+import { displayError } from '@/helpers'
 import { AuthService } from '@/services/api'
 import { AuthWithGooglePayload, LayoutProps, LoginPayload, TUserProfile } from '@/types'
-import { LocalStorageUtil } from '@/utils'
+import { AuthTokenUtil, LocalStorageUtil } from '@/utils'
 
 type AuthContextType = {
   isAuthenticated: boolean
@@ -25,19 +25,19 @@ export const useAuth = (): AuthContextType => {
 }
 
 export const AuthProvider = ({ children }: LayoutProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined)
-  const [userProfile, setUserProfile] = useState<TUserProfile | null | undefined>(undefined)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>()
+  const [userProfile, setUserProfile] = useState<TUserProfile | null>()
 
   const loginUser = async (payload: LoginPayload): Promise<void> => {
     const data = await AuthService.login(payload)
-    setTokenToStorage(data)
+    AuthTokenUtil.persistTokenData(data)
     setIsAuthenticated(true)
     setUserProfile(data.userProfile)
   }
 
   const authenticateWithGoogle = async (payload: AuthWithGooglePayload): Promise<void> => {
     const data = await AuthService.authWithGoogle(payload)
-    setTokenToStorage(data)
+    AuthTokenUtil.persistTokenData(data)
     setIsAuthenticated(true)
     setUserProfile(data.userProfile)
   }
