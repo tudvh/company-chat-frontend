@@ -1,4 +1,4 @@
-import { CreateChannelPayload, TChannel, TChannelDetail } from '@/types'
+import { CreateChannelPayload, TChannel, TChannelDetail, TChannelLinkInvite } from '@/types'
 import apiClient from './api-client'
 
 const path = '/channels'
@@ -20,6 +20,16 @@ export class ChannelService {
 
   public static async getChannelDetail(channelId: string): Promise<TChannelDetail> {
     const { data } = await apiClient.get(`${path}/${channelId}`)
+    return data
+  }
+
+  public static async joinChannel(code: string): Promise<TChannelDetail> {
+    const { data } = await apiClient.post(`${path}/join/${code}`)
+    return data
+  }
+
+  public static async getLinkInvite(channelId: string): Promise<TChannelLinkInvite> {
+    const { data } = await apiClient.get(`${path}/invite/${channelId}`)
     return data
   }
 }
