@@ -10,16 +10,19 @@ export type AuthWithGooglePayload = {
   accessToken: string
 }
 
-export type LoginResponse = {
-  accessToken: string
-  accessTokenExpiresIn: number
-  refreshToken?: string
-  refreshTokenExpiresIn?: number
-  userProfile?: TUserProfile
-}
-
 export type RefreshAccessTokenPayload = {
   refreshToken: string
+}
+
+export type AuthTokenResponse = {
+  accessToken: string
+  accessTokenExpiresIn: number
+  refreshToken: string
+  refreshTokenExpiresIn: number
+}
+
+export type LoginResponse = AuthTokenResponse & {
+  userProfile: TUserProfile
 }
 
 export type TUserProfile = {

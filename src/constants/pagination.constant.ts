@@ -1,6 +1,6 @@
 export const PAGINATION = {
   MARGIN_RANGE_DISPLAY: 3,
-}
+} as const
 
 export const DEFAULT_PAGINATION = {
   currentPage: 1,
@@ -9,4 +9,4 @@ export const DEFAULT_PAGINATION = {
   perPage: 10,
   from: 0,
   to: 0,
-}
+} as const

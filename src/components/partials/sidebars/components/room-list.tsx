@@ -5,32 +5,31 @@ import { Link, useParams } from 'react-router-dom'
 import { SharpIcon } from '@/components/icons'
 import { ROUTES } from '@/configs'
 import { RoomTypeEnum } from '@/enums'
-import { useJointedChannelDetail, useRoom } from '@/hooks'
+import { useChannelDetail, useRoomDetail } from '@/hooks'
 import { cn } from '@/lib/utils'
-
 import { MenuDropdown } from './channel-menu-dropdown'
 
 export const RoomList = () => {
   const { channelId, roomId } = useParams()
-  const { data: jointedChannelDetail } = useJointedChannelDetail(channelId)
-  const { setData: setRoomData } = useRoom()
+  const { channelDetail } = useChannelDetail(channelId)
+  const { updateRoom } = useRoomDetail()
 
   useEffect(() => {
-    if (!jointedChannelDetail) return
-    jointedChannelDetail.groups.forEach(group => {
+    if (!channelDetail) return
+    channelDetail.groups.forEach(group => {
       group.rooms.forEach(room => {
-        setRoomData(room)
+        updateRoom(room)
       })
     })
-  }, [jointedChannelDetail])
+  }, [channelDetail])
 
   return (
     <div className="flex h-full flex-1 flex-col bg-primary/5">
-      {channelId && jointedChannelDetail && (
+      {channelId && channelDetail && (
         <>
-          <MenuDropdown channel={jointedChannelDetail} />
+          <MenuDropdown channel={channelDetail} />
           <ul className="flex flex-1 flex-col gap-5 overflow-y-auto px-2 py-5">
-            {jointedChannelDetail.groups.map(group => (
+            {channelDetail.groups.map(group => (
               <div key={group.id} className="space-y-1 font-medium text-muted-foreground">
                 <div className="flex gap-1">
                   <ChevronRight className="size-3.5" />

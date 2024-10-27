@@ -7,24 +7,24 @@ import { AppDialog, AppTooltip } from '@/components/ui'
 import { ROUTES } from '@/configs'
 import { useAuth } from '@/contexts'
 import { displayError } from '@/helpers'
-import { useJointedChannels } from '@/hooks'
+import { useChannels } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { ChannelCreate } from './channel-create'
 
 export const ChannelList = () => {
   const { userProfile } = useAuth()
   const { channelId } = useParams()
-  const { data: jointedChannels, error: myChannelsError } = useJointedChannels(userProfile?.id)
+  const { channels, error: channelsError } = useChannels(userProfile?.id)
   const [isModalOpen, setModalOpen] = useState(false)
   const location = useLocation()
   const pathName = location.pathname
 
   useEffect(() => {
-    if (myChannelsError) {
-      displayError(myChannelsError)
-      console.error('Error fetching my channels:', myChannelsError)
+    if (channelsError) {
+      displayError(channelsError)
+      console.error('Error fetching my channels:', channelsError)
     }
-  }, [myChannelsError])
+  }, [channelsError])
 
   return (
     <div className="thread-scroll h-full overflow-y-auto bg-primary/10 pr-2">
@@ -48,7 +48,7 @@ export const ChannelList = () => {
         </div>
         <div className="ml-3 h-0.5 w-full rounded-full bg-primary" />
         {/* List of channels */}
-        {jointedChannels?.map(channel => (
+        {channels?.map(channel => (
           <div className="flex gap-1.5" key={channel.id}>
             <div
               className={cn(
