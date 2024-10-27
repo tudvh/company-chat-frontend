@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Volume2 } from 'lucide-react'
+import { ChevronRight, Volume2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -7,6 +7,8 @@ import { ROUTES } from '@/configs'
 import { RoomTypeEnum } from '@/enums'
 import { useJointedChannelDetail, useRoom } from '@/hooks'
 import { cn } from '@/lib/utils'
+
+import { MenuDropdown } from './channel-menu-dropdown'
 
 export const RoomList = () => {
   const { channelId, roomId } = useParams()
@@ -26,10 +28,7 @@ export const RoomList = () => {
     <div className="flex h-full flex-1 flex-col bg-primary/5">
       {channelId && jointedChannelDetail && (
         <>
-          <button className="flex h-12 w-full items-center justify-between gap-3 border-b px-4 font-bold">
-            <h1 className="line-clamp-1 flex-1 text-left">{jointedChannelDetail.name}</h1>
-            <ChevronDown className="size-5" />
-          </button>
+          <MenuDropdown channel={jointedChannelDetail} />
           <ul className="flex flex-1 flex-col gap-5 overflow-y-auto px-2 py-5">
             {jointedChannelDetail.groups.map(group => (
               <div key={group.id} className="space-y-1 font-medium text-muted-foreground">
