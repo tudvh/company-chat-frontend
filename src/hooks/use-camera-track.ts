@@ -1,6 +1,8 @@
 import { CameraVideoTrackInitConfig, IAgoraRTCClient, useLocalCameraTrack } from 'agora-rtc-react'
 import { useCallback, useEffect, useRef } from 'react'
 
+import { displayError } from '@/helpers'
+
 export const useCameraTrack = (
   ready: boolean,
   cameraVideoTrackConfig: CameraVideoTrackInitConfig,
@@ -23,6 +25,7 @@ export const useCameraTrack = (
         await clientRef.current.publish(localCameraTrack)
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error starting ${localCameraTrack}:`, error)
     }
   }, [localCameraTrack])
@@ -37,6 +40,7 @@ export const useCameraTrack = (
         await clientRef.current.unpublish(localCameraTrack)
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error stopping ${localCameraTrack}:`, error)
     }
   }, [localCameraTrack])

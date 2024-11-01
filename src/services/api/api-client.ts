@@ -52,7 +52,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   response => response,
   async error => {
-    if (error.response?.status === HttpStatusCode.Unauthorized) {
+    if (error.response?.status !== HttpStatusCode.Unauthorized) {
       return Promise.reject(error)
     }
     const newToken = await handleTokenRefresh()

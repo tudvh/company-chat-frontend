@@ -1,8 +1,12 @@
 import { UseFormSetError } from 'react-hook-form'
 
-import { ToastUtil } from '@/utils'
+import { AlertUtil, ToastUtil } from '@/utils'
 
-export const displayError = (error: any): void => {
+interface DisplayErrorOptions {
+  title: string
+}
+
+export const displayError = async (error: any, options?: DisplayErrorOptions): Promise<void> => {
   try {
     let errorMessage: string
     if (Array.isArray(error.response?.data?.message)) {
@@ -13,7 +17,11 @@ export const displayError = (error: any): void => {
         error.message ||
         'Something went wrong. Please try again later.'
     }
-    ToastUtil.error(errorMessage)
+    if (options) {
+      await AlertUtil.alert({ title: options.title, text: errorMessage, icon: 'error' })
+    } else {
+      ToastUtil.error(errorMessage)
+    }
   } catch (err) {
     ToastUtil.error('An unexpected error occurred.')
     console.error('Error handling response error:', err)

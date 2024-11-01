@@ -94,7 +94,6 @@ export const ChannelList = () => {
           onOpenChange={setModalOpen}
           title="Khởi tạo máy chủ mới"
           description="Chọn một cái tên độc đáo và ấn tượng cho máy chủ mới của bạn – đừng lo, bạn luôn có thể thay đổi nó sau!"
-          onClose={() => setModalOpen(false)}
           isStatic
         >
           <ChannelCreate isModalOpen={isModalOpen} onClose={() => setModalOpen(false)} />

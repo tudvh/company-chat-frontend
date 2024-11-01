@@ -4,9 +4,7 @@ type SharpIconProps = {
   className?: string
 }
 
-export const SharpIcon = (props: SharpIconProps) => {
-  const { className } = props
-
+export const SharpIcon = ({ className }: SharpIconProps) => {
   return (
     <svg
       aria-hidden="true"

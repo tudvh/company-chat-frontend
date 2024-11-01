@@ -21,7 +21,6 @@ import { useCameraTrack, useMicrophoneTrack, useRoomDetail, useScreenTrack } fro
 import { cn } from '@/lib/utils'
 import { RoomService } from '@/services/api'
 import { TCallInfo } from '@/types'
-import { AlertUtil } from '@/utils'
 
 export const CallRoomPage = () => {
   const client = useRTCClient()
@@ -93,10 +92,8 @@ export const CallRoomPage = () => {
   useEffect(() => {
     if (myProfile.error) {
       setCalling(false)
-      AlertUtil.alert({
-        title: 'Lỗi khi vào phòng thoại',
-        text: myProfile.error.message,
-        icon: 'error',
+      displayError(myProfile.error, {
+        title: 'Lỗi khi tham gia cuộc gọi',
       })
     }
   }, [myProfile.error])

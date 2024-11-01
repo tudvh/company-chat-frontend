@@ -6,26 +6,24 @@ import { AlertParams, ConfirmParams, InputFileParams, InputTextParams } from '@/
 export class AlertUtil {
   private static MySwal = withReactContent(Swal)
 
-  public static alert(params: AlertParams): void {
-    const { title, text, icon = 'info' } = params
-
-    this.MySwal.fire({
+  public static async alert({ title, text, icon = 'info' }: AlertParams): Promise<void> {
+    await this.MySwal.fire({
       title,
       text,
       icon,
     })
   }
 
-  public static async confirm(params: ConfirmParams): Promise<boolean> {
-    const {
-      title,
-      confirmButtonText = 'Xác nhận',
-      cancelButtonText = 'Hủy',
-      icon = 'warning',
-    } = params
-
+  public static async confirm({
+    title,
+    text,
+    confirmButtonText = 'Xác nhận',
+    cancelButtonText = 'Hủy',
+    icon = 'warning',
+  }: ConfirmParams): Promise<boolean> {
     const result = await this.MySwal.fire({
       title,
+      text,
       icon,
       showCancelButton: true,
       confirmButtonText,
@@ -35,9 +33,10 @@ export class AlertUtil {
     return result.isConfirmed
   }
 
-  public static async inputText(params: InputTextParams): Promise<string | null> {
-    const { title, inputPlaceholder = 'Nhập' } = params
-
+  public static async inputText({
+    title,
+    inputPlaceholder = 'Nhập',
+  }: InputTextParams): Promise<string | null> {
     const result = await this.MySwal.fire({
       title,
       input: 'text',
@@ -47,9 +46,7 @@ export class AlertUtil {
     return result.value || null
   }
 
-  public static async inputFile(params: InputFileParams): Promise<File | null> {
-    const { title } = params
-
+  public static async inputFile({ title }: InputFileParams): Promise<File | null> {
     const result = await this.MySwal.fire({
       title,
       input: 'file',

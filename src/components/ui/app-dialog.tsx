@@ -9,7 +9,6 @@ interface AppDialogProps {
   description?: string
   isStatic?: boolean
   onOpenChange: (isOpen: boolean) => void
-  onClose?: () => void
 }
 
 export const AppDialog = ({
@@ -19,17 +18,9 @@ export const AppDialog = ({
   description,
   isStatic,
   onOpenChange,
-  onClose,
 }: AppDialogProps) => {
-  const handleOpenChange = (isOpen: boolean) => {
-    onOpenChange(isOpen)
-    if (!isOpen && onClose) {
-      onClose()
-    }
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         onPointerDownOutside={e => {
           if (isStatic) {
