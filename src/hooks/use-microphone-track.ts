@@ -5,6 +5,8 @@ import {
 } from 'agora-rtc-react'
 import { useCallback, useEffect, useRef } from 'react'
 
+import { displayError } from '@/helpers'
+
 export const useMicrophoneTrack = (
   ready: boolean,
   audioTrackConfig: MicrophoneAudioTrackInitConfig,
@@ -27,6 +29,7 @@ export const useMicrophoneTrack = (
         await clientRef.current.publish(localMicrophoneTrack)
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error starting ${localMicrophoneTrack}:`, error)
     }
   }, [localMicrophoneTrack])
@@ -41,6 +44,7 @@ export const useMicrophoneTrack = (
         await clientRef.current.unpublish(localMicrophoneTrack)
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error stopping ${localMicrophoneTrack}:`, error)
     }
   }, [localMicrophoneTrack])

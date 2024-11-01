@@ -29,9 +29,9 @@ interface ChannelCreateProps {
   onClose: () => void
 }
 
-const defaultValues = {
+const DEFAULT_FORM_VALUE = {
   name: '',
-}
+} as const
 
 export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
   const { userProfile } = useAuth()
@@ -44,7 +44,7 @@ export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
 
   const form = useForm<TCreateChannelSchema>({
     resolver: yupResolver(createChannelSchema),
-    defaultValues: defaultValues,
+    defaultValues: DEFAULT_FORM_VALUE,
   })
 
   const { name: nameError } = form.formState.errors
@@ -57,7 +57,7 @@ export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
   }
 
   const resetFormFields = () => {
-    form.reset(defaultValues)
+    form.reset(DEFAULT_FORM_VALUE)
     setThumbnailFile(null)
   }
 
@@ -137,7 +137,7 @@ export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
         />
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
             name="name"
@@ -151,10 +151,11 @@ export const ChannelCreate = ({ isModalOpen, onClose }: ChannelCreateProps) => {
               </FormItem>
             )}
           />
-          <div className="flex justify-end">
-            <Button type="submit" className="ms-auto">
-              Tạo mới
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Hủy bỏ
             </Button>
+            <Button type="submit">Tạo mới</Button>
           </div>
         </form>
       </Form>

@@ -14,8 +14,12 @@ export type TChannelDetail = TChannel & {
   groups: TGroupDetail[]
 }
 
-export type TChannelLinkInvite = {
-  inviteString: string
+export type TChannelInvite = {
+  code: string
+}
+
+export type JoinChannelPayload = {
+  code: string
 }
 
 export type TCreateChannelSchema = yup.InferType<typeof createChannelSchema>

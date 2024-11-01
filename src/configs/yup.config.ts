@@ -2,10 +2,10 @@ import * as yup from 'yup'
 
 yup.setLocale({
   mixed: {
-    required: 'Vui lòng nhập thông tin này',
+    required: 'Trường này là bắt buộc',
   },
   string: {
-    email: 'Vui lòng nhập đúng định dạng email',
+    email: 'Email không hợp lệ',
   },
 })
 

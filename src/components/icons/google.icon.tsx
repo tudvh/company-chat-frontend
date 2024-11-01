@@ -4,9 +4,7 @@ type GoogleIconProps = {
   className?: string
 }
 
-export const GoogleIcon = (props: GoogleIconProps) => {
-  const { className } = props
-
+export const GoogleIcon = ({ className }: GoogleIconProps) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

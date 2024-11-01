@@ -1,4 +1,6 @@
+import { yup } from '@/configs'
 import { RoomTypeEnum } from '@/enums'
+import { createRoomSchema } from '@/schema/room'
 
 export type TRoom = {
   id: string
@@ -11,4 +13,10 @@ export type TRoom = {
 export type TCallInfo = {
   channel: string
   rtcToken: string
+}
+
+export type TCreateRoomSchema = yup.InferType<typeof createRoomSchema>
+
+export type CreateRoomPayload = TCreateRoomSchema & {
+  groupId?: string
 }

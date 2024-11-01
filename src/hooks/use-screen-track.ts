@@ -1,6 +1,8 @@
 import { IAgoraRTCClient, ScreenVideoTrackInitConfig, useLocalScreenTrack } from 'agora-rtc-react'
 import { Dispatch, useCallback, useEffect, useRef } from 'react'
 
+import { displayError } from '@/helpers'
+
 export const useScreenTrack = (
   ready: boolean,
   setReady: Dispatch<React.SetStateAction<boolean>>,
@@ -27,6 +29,7 @@ export const useScreenTrack = (
         await clientRef.current.publish(screenTrack)
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error starting ${screenTrack}:`, error)
     }
   }, [screenTrack])
@@ -41,6 +44,7 @@ export const useScreenTrack = (
         screenTrack.close()
       }
     } catch (error) {
+      displayError(error)
       console.error(`Error stopping ${screenTrack}:`, error)
     }
   }, [screenTrack])

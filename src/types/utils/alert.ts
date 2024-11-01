@@ -8,6 +8,7 @@ export type AlertParams = {
 
 export type ConfirmParams = {
   title: string
+  text?: string
   confirmButtonText?: string
   cancelButtonText?: string
   icon?: SweetAlertIcon
