@@ -11,14 +11,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui'
 import { ROUTES } from '@/configs'
-import { useLoading } from '@/contexts'
+import { useAuth, useLoading } from '@/contexts'
 import { displayError } from '@/helpers'
 import { cn } from '@/lib/utils'
 import { ChannelService } from '@/services/api'
 import { TChannelDetail } from '@/types'
-import { AlertUtil } from '@/utils'
+import { AlertUtil, ToastUtil } from '@/utils'
 import { GroupCreate } from './group-create'
 import { InviteCreate } from './invite-create'
+import { useChannels } from '@/hooks'
 
 interface MenuDropdownProps {
   channel: TChannelDetail
@@ -26,6 +27,8 @@ interface MenuDropdownProps {
 
 export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
   const { showLoading, hideLoading } = useLoading()
+  const { userProfile } = useAuth()
+  const { invalidateChannels } = useChannels(userProfile?.id)
   const [isModalInviteOpen, setModalInviteOpen] = useState(false)
   const [isModalGroupOpen, setModalGroupOpen] = useState(false)
   const navigate = useNavigate()
@@ -42,10 +45,12 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
 
   const leaveChannel = async () => {
     try {
+      showLoading()
       await ChannelService.leaveChannel(channel.id)
+      ToastUtil.success('Rời khỏi máy chủ thành công')
+      invalidateChannels()
       navigate(ROUTES.HOME)
     } catch (error) {
-      showLoading()
       displayError(error, {
         title: 'Rời khỏi máy chủ thất bại',
       })
