@@ -42,12 +42,13 @@ export const CallRoomPage = () => {
   const isConnected = useIsConnected()
   const remoteUsers = useRemoteUsers()
   const { videoTracks: remoteVideoTracks } = useRemoteVideoTracks(remoteUsers)
+
   const myProfile = useJoin(
     {
       appid: getEnv('VITE_AGORA_APP_ID'),
-      channel: callInfo?.channel || '',
-      token: callInfo?.rtcToken || null,
-      uid: userProfile?.id,
+      channel: callInfo?.channel ?? '',
+      token: callInfo?.rtcToken ?? '',
+      uid: callInfo?.uid,
     },
     calling,
   )

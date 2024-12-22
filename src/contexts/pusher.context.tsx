@@ -5,7 +5,7 @@ import { getEnv } from '@/helpers'
 import { LayoutProps } from '@/types'
 
 type PusherContextType = {
-  subscribeToChannel: (channelName: string) => void
+  subscribeToChannel: (channelName: string) => Channel
   bindEventToChannel: (
     channelName: string,
     eventName: string,
@@ -33,9 +33,10 @@ export const PusherProvider = ({ children }: LayoutProps) => {
     })
   }, [])
 
-  const subscribeToChannel = (channelName: string): void => {
+  const subscribeToChannel = (channelName: string): Channel => {
     const newChannel = pusherInstance.subscribe(channelName)
     setChannels(prevChannels => [...prevChannels, newChannel])
+    return newChannel
   }
 
   const getChannel = (channelName: string): Channel => {

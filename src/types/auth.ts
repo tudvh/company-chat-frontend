@@ -1,6 +1,6 @@
 import { yup } from '@/configs'
-
 import { loginSchema } from '@/schema'
+import { TUserProfile } from './user'
 
 export type TLoginSchema = yup.InferType<typeof loginSchema>
 
@@ -23,17 +23,4 @@ export type AuthTokenResponse = {
 
 export type LoginResponse = AuthTokenResponse & {
   userProfile: TUserProfile
-}
-
-export type TUserProfile = {
-  id: string
-  fullName: string
-  dob: string | null
-  gender: number | null
-  phoneNumber: string | null
-  avatarPublicId: string | null
-  avatarUrl: string | null
-  email: string
-  googleId: string
-  type: number
 }

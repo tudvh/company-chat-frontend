@@ -13,6 +13,7 @@ export type TRoom = {
 export type TCallInfo = {
   channel: string
   rtcToken: string
+  uid: number
 }
 
 export type TCreateRoomSchema = yup.InferType<typeof createRoomSchema>
