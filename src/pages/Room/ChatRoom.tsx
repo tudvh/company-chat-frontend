@@ -1,16 +1,16 @@
-import { format } from 'date-fns'
 import { FileIcon, Plus, SendIcon, X } from 'lucide-react'
 import { Channel } from 'pusher-js'
 import { KeyboardEvent, useEffect, useRef, useState } from 'react'
 
-import { UserAvatarDefault } from '@/assets/images'
 import { SharpIcon } from '@/components/icons'
 import { Button, Textarea } from '@/components/ui'
-import { DATE_FORMAT } from '@/constants'
-import { usePusher } from '@/contexts'
+import { useAuth, usePusher } from '@/contexts'
 import { displayError } from '@/helpers'
+import { cn } from '@/lib/utils'
 import { MessageService } from '@/services/api'
 import { TMessage, TRoom } from '@/types'
+import { LoadingMessageItem } from './LoadingMessageItem'
+import { MessageItem } from './MessageItem'
 
 interface ChatRoomPageProps {
   room: TRoom
@@ -18,14 +18,18 @@ interface ChatRoomPageProps {
 
 export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
   const { subscribeToChannel, unsubscribeFromChannel, bindEventToChannel } = usePusher()
+  const { userProfile } = useAuth()
   const [messages, setMessages] = useState<TMessage[]>([])
   const [content, setContent] = useState('')
   const [files, setFiles] = useState<File[]>([])
   const [pusherChannel, setPusherChannel] = useState<Channel>()
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const getAllMessages = async () => {
     try {
+      setIsLoadingMessages(true)
       const data = await MessageService.getAllMessagesByRoom({
         roomId: room.id,
       })
@@ -33,6 +37,7 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
     } catch (error) {
       displayError(error)
     } finally {
+      setIsLoadingMessages(false)
     }
   }
 
@@ -58,6 +63,9 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
   }
 
   const handleSendMessage = async () => {
+    const tempContent = content
+    const tempFiles = files
+
     try {
       if (!content.trim() && files.length <= 0) return
 
@@ -71,14 +79,19 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
         })
       }
 
-      await MessageService.sendMessage(formData)
-
+      setIsSendingMessage(true)
       setContent('')
       setFiles([])
+
+      await MessageService.sendMessage(formData)
+
       getAllMessages()
     } catch (error) {
       displayError(error)
+      setContent(tempContent)
+      setFiles(tempFiles)
     } finally {
+      setIsSendingMessage(false)
     }
   }
 
@@ -97,8 +110,7 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
   useEffect(() => {
     getAllMessages()
     resizeTextArea()
-    const channel = subscribeToChannel(room.id)
-    setPusherChannel(channel)
+    setPusherChannel(subscribeToChannel(room.id))
 
     return () => {
       unsubscribeFromChannel(room.id)
@@ -117,10 +129,17 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
 
   useEffect(() => {
     if (!pusherChannel) return
-    bindEventToChannel(room.id, 'new-message', () => {
+    bindEventToChannel(room.id, 'new-message', (data: TMessage) => {
+      if (data.sender.id === userProfile?.id) return
       getAllMessages()
     })
   }, [pusherChannel])
+
+  useEffect(() => {
+    if (!isSendingMessage) {
+      textareaRef.current?.focus()
+    }
+  }, [isSendingMessage])
 
   return (
     <div className="flex h-full flex-col">
@@ -139,38 +158,18 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
             </h1>
           </div>
           <div className="flex flex-col gap-2">
-            {messages.map(message => (
-              <div
-                className="flex items-start gap-4 rounded px-2 py-3 hover:bg-muted"
-                key={message.id}
-              >
-                <img
-                  src={message.sender.avatarUrl || UserAvatarDefault}
-                  className="aspect-square size-10 cursor-pointer rounded-full"
-                />
-                <div className="flex-1 space-y-1">
-                  <h3 className="flex items-center gap-2 font-bold">
-                    <span className="cursor-pointer hover:underline">
-                      {message.sender.fullName}
-                    </span>
-                    <span className="text-xs font-normal">
-                      {format(message.createdAt, DATE_FORMAT.DATE_TIME_DASH)}
-                    </span>
-                  </h3>
-                  <p className="break-all">{message.content}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {message.attachments.map(attachment => (
-                      <div className="flex items-center justify-start gap-1 rounded bg-primary/10 p-4">
-                        <FileIcon className="size-8" />
-                        <span className="line-clamp-1 cursor-pointer text-sm">
-                          {attachment.fileName}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+            {isLoadingMessages ? (
+              <>
+                <LoadingMessageItem />
+                <LoadingMessageItem />
+                <LoadingMessageItem />
+                <LoadingMessageItem />
+                <LoadingMessageItem />
+              </>
+            ) : (
+              messages.map(message => <MessageItem key={message.id} message={message} />)
+            )}
+            {isSendingMessage && <LoadingMessageItem />}
           </div>
         </div>
       </div>
@@ -212,7 +211,13 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
                 multiple
               />
               <div className="flex size-10 items-center justify-center overflow-hidden rounded-full bg-primary/10">
-                <label htmlFor="file-upload" className="cursor-pointer">
+                <label
+                  htmlFor="file-upload"
+                  className={cn(
+                    'cursor-pointer',
+                    isSendingMessage && 'pointer-events-none opacity-50',
+                  )}
+                >
                   <Plus />
                 </label>
               </div>
@@ -224,12 +229,13 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
                   className="h-10 min-h-10 resize-none overflow-hidden break-all rounded-sm bg-transparent px-0 py-[9px] !text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                   rows={1}
                   value={content}
+                  disabled={isSendingMessage}
                   onChange={e => setContent(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
               </div>
             </div>
-            <Button onClick={handleSendMessage}>
+            <Button onClick={handleSendMessage} disabled={isSendingMessage}>
               <SendIcon />
             </Button>
           </div>

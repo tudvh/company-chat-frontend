@@ -16,5 +16,6 @@ export type TMessage = {
 export type TMessageAttachment = {
   id: string
   fileName: string
-  fleType: string
+  fileType: string
+  fileUrl: string
 }
