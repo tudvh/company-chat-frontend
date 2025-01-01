@@ -1,13 +1,14 @@
 import { format } from 'date-fns'
+import parse from 'html-react-parser'
 import { FileIcon, LoaderCircle } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { UserAvatarDefault } from '@/assets/images'
 import { DATE_FORMAT } from '@/constants'
 import { displayError } from '@/helpers'
 import { cn } from '@/lib/utils'
 import { TMessage, TMessageAttachment } from '@/types'
-import { Link } from 'react-router-dom'
 
 interface MessageItemProps {
   message: TMessage
@@ -17,17 +18,17 @@ export const MessageItem = (props: MessageItemProps) => {
   const { message } = props
   const [downloadingAttachmentIds, setDownloadingAttachmentIds] = useState<string[]>([])
 
-  const detectAndRenderPaths = (text: string) => {
-    const pathRegex = /(\/[a-zA-Z0-9-_\/]+)/g // Regex to detect paths
-    return text.split(pathRegex).map((part, index) =>
-      pathRegex.test(part) ? (
-        <Link to={part} key={index} className="text-blue-500 underline">
-          Link
-        </Link>
-      ) : (
-        part
-      ),
-    )
+  const transform = {
+    replace: (domNode: any) => {
+      if (domNode.name === 'a') {
+        const to = domNode.attribs.href
+        return (
+          <Link to={to} className="text-blue-500 underline">
+            {domNode.children[0]?.data}
+          </Link>
+        )
+      }
+    },
   }
 
   const handleDownloadAttachment = (attachment: TMessageAttachment) => {
@@ -68,9 +69,9 @@ export const MessageItem = (props: MessageItemProps) => {
             {format(message.createdAt, DATE_FORMAT.DATE_TIME_DASH)}
           </span>
         </h3>
-        <p className="break-all">{detectAndRenderPaths(message.content)}</p>
+        <p className="break-all">{parse(message.content, transform)}</p>
         <div className="flex flex-wrap gap-5">
-          {message.attachments.map(attachment => {
+          {message.attachments?.map(attachment => {
             if (attachment.fileType.includes('image')) {
               return (
                 <img

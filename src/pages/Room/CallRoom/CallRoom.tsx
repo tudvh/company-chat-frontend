@@ -129,7 +129,9 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
     })
     pusherChannel.bind('pusher:member_added', (member: TPusherEventMember) => {
       console.log('pusher:member_added', member)
-      remoteUserInfos[member.id] = member.info
+      const newRemoteUserInfos = { ...remoteUserInfos }
+      newRemoteUserInfos[member.id] = member.info
+      setRemoteUserInfos(newRemoteUserInfos)
     })
     pusherChannel.bind('pusher:member_removed', (member: TPusherEventMember) => {
       console.log('pusher:member_removed', member)
@@ -150,7 +152,7 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
     return () => {
       setCalling(false)
     }
-  }, [])
+  }, [room.id])
 
   return (
     <div className="flex size-full flex-col items-center justify-center gap-5 bg-background p-5 text-foreground">
