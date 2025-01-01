@@ -11,11 +11,12 @@ export class MessageService {
     return data
   }
 
-  public static async sendMessage(payload: FormData): Promise<void> {
-    await apiClient.post(path, payload, {
+  public static async sendMessage(payload: FormData): Promise<TMessage> {
+    const { data } = await apiClient.post(path, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
+    return data
   }
 }

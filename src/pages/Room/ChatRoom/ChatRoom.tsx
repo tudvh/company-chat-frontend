@@ -83,9 +83,8 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
       setContent('')
       setFiles([])
 
-      await MessageService.sendMessage(formData)
-
-      getAllMessages()
+      const data = await MessageService.sendMessage(formData)
+      setMessages(prev => [...prev, data])
     } catch (error) {
       displayError(error)
       setContent(tempContent)
@@ -115,7 +114,7 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
     return () => {
       unsubscribeFromChannel(room.id)
     }
-  }, [])
+  }, [room.id])
 
   useEffect(() => {
     textareaRef.current?.focus()
@@ -131,9 +130,7 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
     if (!pusherChannel) return
     bindEventToChannel(pusherChannel, 'new-message', (data: TMessage) => {
       if (data.sender.id === userProfile?.id) return
-      setTimeout(() => {
-        getAllMessages()
-      }, 1000)
+      setMessages(prev => [...prev, data])
     })
   }, [pusherChannel])
 
