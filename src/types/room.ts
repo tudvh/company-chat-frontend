@@ -1,6 +1,9 @@
+import { UID } from 'agora-rtc-react'
+
 import { yup } from '@/configs'
 import { RoomTypeEnum } from '@/enums'
 import { createRoomSchema } from '@/schema/room'
+import { TMessageUser } from './user'
 
 export type TRoom = {
   id: string
@@ -16,17 +19,8 @@ export type TCallInfo = {
   uid: number
 }
 
-export type TRemoteUserInfo = {
-  uid: string | number
-  id: string
-  fullName: string
-  avatarUrl: string
-}
-
-export type GetCallInfoPayload = {
-  roomId: string
-  channelName: string
-  socketId: string
+export type TRemoteUserInfos = {
+  [key: UID]: TMessageUser
 }
 
 export type TCreateRoomSchema = yup.InferType<typeof createRoomSchema>

@@ -9,7 +9,7 @@ import {
   useRTCClient,
 } from 'agora-rtc-react'
 import { Mic, MicOff, MonitorOff, MonitorUp, Phone, Video, VideoOff } from 'lucide-react'
-import { Channel } from 'pusher-js'
+import { Channel, Members } from 'pusher-js'
 import { useEffect, useState } from 'react'
 
 import { UserAvatarDefault } from '@/assets/images'
@@ -19,7 +19,7 @@ import { displayError, getEnv } from '@/helpers'
 import { useCameraTrack, useMicrophoneTrack, useScreenShareTrack } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { RoomService } from '@/services/api'
-import { GetCallInfoPayload, TCallInfo, TRemoteUserInfo, TRoom } from '@/types'
+import { TCallInfo, TPusherEventMember, TRemoteUserInfos, TRoom } from '@/types'
 
 interface CallRoomPageProps {
   room: TRoom
@@ -33,9 +33,9 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
   const [isCameraOn, setIsCameraOn] = useState(false)
   const [isScreenShareOn, setIsScreenShareOn] = useState(false)
   const [pusherChannel, setPusherChannel] = useState<Channel>()
-  const [remoteUserInfos, setRemoteUserInfos] = useState<TRemoteUserInfo[]>([])
+  const [remoteUserInfos, setRemoteUserInfos] = useState<TRemoteUserInfos>({})
   const { userProfile } = useAuth()
-  const { socketId, subscribeToChannel, unsubscribeFromChannel, bindEventToChannel } = usePusher()
+  const { subscribeToChannel, unsubscribeFromChannel } = usePusher()
   const { error: microphoneTrackError } = useMicrophoneTrack(isMicOn, {}, client)
   const { localCameraTrack, error: cameraTrackError } = useCameraTrack(isCameraOn, {}, client)
   const {
@@ -57,16 +57,8 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
   )
 
   const createCallToken = async () => {
-    console.log(pusherChannel, socketId)
-
-    if (!pusherChannel || !socketId) return
     try {
-      const payload: GetCallInfoPayload = {
-        roomId: room.id,
-        channelName: room.id,
-        socketId,
-      }
-      const data = await RoomService.getCallInfo(payload)
+      const data = await RoomService.getCallInfo(room.id)
       setCallInfo(data)
       setCalling(true)
     } catch (error: any) {
@@ -123,25 +115,40 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
   }, [myProfile.error])
 
   useEffect(() => {
-    if (!pusherChannel || !socketId) return
-    createCallToken()
-    pusherChannel.bind('pusher:subscription_succeeded', (member: any) => {
-      console.log('subscription_succeeded', member)
+    if (!pusherChannel) return
+
+    pusherChannel.bind('pusher:subscription_succeeded', (member: Members) => {
+      console.log('pusher:subscription_succeeded', member)
+      const remoteUserInfos = Object.keys(member.members)
+        .filter(key => key !== member.me.id)
+        .reduce((obj: any, key) => {
+          obj[key] = member.members[key]
+          return obj
+        }, {})
+      setRemoteUserInfos(remoteUserInfos)
     })
-    pusherChannel.bind('pusher:member_added', (member: any) => {
+    pusherChannel.bind('pusher:member_added', (member: TPusherEventMember) => {
+      console.log('pusher:member_added', member)
+      remoteUserInfos[member.id] = member.info
+    })
+    pusherChannel.bind('pusher:member_removed', (member: TPusherEventMember) => {
       console.log('pusher:member_removed', member)
     })
-    pusherChannel.bind('pusher:member_removed', (member: any) => {
-      console.log('pusher:member_removed', member)
-    })
-  }, [pusherChannel, socketId])
+  }, [pusherChannel])
 
   useEffect(() => {
     setPusherChannel(subscribeToChannel(`presence-${room.id}`))
 
     return () => {
+      unsubscribeFromChannel(`presence-${room.id}`)
+    }
+  }, [calling])
+
+  useEffect(() => {
+    createCallToken()
+
+    return () => {
       setCalling(false)
-      unsubscribeFromChannel(room.id)
     }
   }, [])
 
@@ -179,15 +186,12 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
                       <RemoteVideoTrack track={user.videoTrack} play />
                     ) : (
                       <RemoteUser
-                        cover={
-                          remoteUserInfos.find(u => u.uid == user.uid)?.avatarUrl ??
-                          UserAvatarDefault
-                        }
+                        cover={remoteUserInfos[user.uid]?.avatarUrl ?? UserAvatarDefault}
                         user={user}
                       />
                     )}
                   </div>
-                  <p>{remoteUserInfos.find(u => u.uid == user.uid)?.fullName ?? user.uid}</p>
+                  <p>{remoteUserInfos[user.uid]?.fullName ?? user.uid}</p>
                 </div>
               ))}
             </div>
