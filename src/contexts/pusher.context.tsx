@@ -3,8 +3,10 @@ import { createContext, useContext, useMemo, useState } from 'react'
 
 import { getEnv } from '@/helpers'
 import { LayoutProps } from '@/types'
+import { AuthTokenUtil } from '@/utils'
 
 type PusherContextType = {
+  socketId: string | undefined
   subscribeToChannel: (channelName: string) => Channel
   bindEventToChannel: (
     channelName: string,
@@ -26,16 +28,25 @@ export const usePusher = (): PusherContextType => {
 
 export const PusherProvider = ({ children }: LayoutProps) => {
   const [channels, setChannels] = useState<Channel[]>([])
+  const [socketId, setSocketId] = useState<string>()
+  const { accessToken } = AuthTokenUtil.retrieveTokenData()
 
   const pusherInstance: Pusher = useMemo(() => {
     return new Pusher(getEnv('VITE_PUSHER_APP_KEY'), {
       cluster: getEnv('VITE_PUSHER_APP_CLUSTER'),
+      authEndpoint: `${getEnv('VITE_APP_API_URL')}/pusher/auth`,
+      auth: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
     })
   }, [])
 
   const subscribeToChannel = (channelName: string): Channel => {
     const newChannel = pusherInstance.subscribe(channelName)
     setChannels(prevChannels => [...prevChannels, newChannel])
+    setSocketId(pusherInstance.connection.socket_id)
     return newChannel
   }
 
@@ -51,6 +62,8 @@ export const PusherProvider = ({ children }: LayoutProps) => {
 
   const unsubscribeFromChannel = (channelName: string): void => {
     pusherInstance.unsubscribe(channelName)
+    setChannels(prevChannels => prevChannels.filter(channel => channel.name !== channelName))
+    setSocketId(undefined)
   }
 
   const bindEventToChannel = (
@@ -63,6 +76,7 @@ export const PusherProvider = ({ children }: LayoutProps) => {
   }
 
   const contextValue: PusherContextType = {
+    socketId,
     subscribeToChannel,
     bindEventToChannel,
     unsubscribeFromChannel,

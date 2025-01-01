@@ -6,42 +6,45 @@ import {
   useIsConnected,
   useJoin,
   useRemoteUsers,
-  useRemoteVideoTracks,
   useRTCClient,
 } from 'agora-rtc-react'
 import { Mic, MicOff, MonitorOff, MonitorUp, Phone, Video, VideoOff } from 'lucide-react'
+import { Channel } from 'pusher-js'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
 
 import { UserAvatarDefault } from '@/assets/images'
 import { AppTooltip, Button } from '@/components/ui'
-import { useAuth } from '@/contexts'
+import { useAuth, usePusher } from '@/contexts'
 import { displayError, getEnv } from '@/helpers'
-import { useCameraTrack, useMicrophoneTrack, useRoomDetail, useScreenTrack } from '@/hooks'
+import { useCameraTrack, useMicrophoneTrack, useScreenShareTrack } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { RoomService } from '@/services/api'
-import { TCallInfo } from '@/types'
+import { GetCallInfoPayload, TCallInfo, TRemoteUserInfo, TRoom } from '@/types'
 
-export const CallRoomPage = () => {
+interface CallRoomPageProps {
+  room: TRoom
+}
+
+export const CallRoomPage = ({ room }: CallRoomPageProps) => {
   const client = useRTCClient()
   const [calling, setCalling] = useState(false)
   const [callInfo, setCallInfo] = useState<TCallInfo>()
   const [isMicOn, setIsMicOn] = useState(false)
   const [isCameraOn, setIsCameraOn] = useState(false)
   const [isScreenShareOn, setIsScreenShareOn] = useState(false)
-  const { roomId } = useParams()
+  const [pusherChannel, setPusherChannel] = useState<Channel>()
+  const [remoteUserInfos, setRemoteUserInfos] = useState<TRemoteUserInfo[]>([])
   const { userProfile } = useAuth()
-  const { room } = useRoomDetail(roomId)
+  const { socketId, subscribeToChannel, unsubscribeFromChannel, bindEventToChannel } = usePusher()
   const { error: microphoneTrackError } = useMicrophoneTrack(isMicOn, {}, client)
-  const { error: cameraTrackError } = useCameraTrack(isCameraOn, {}, client)
+  const { localCameraTrack, error: cameraTrackError } = useCameraTrack(isCameraOn, {}, client)
   const {
     screenTrack: localScreenTrack,
     error: screenTrackError,
     isLoading: isLoadingScreenTrack,
-  } = useScreenTrack(isScreenShareOn, setIsScreenShareOn, {}, client)
+  } = useScreenShareTrack(isScreenShareOn, setIsScreenShareOn, {}, client)
   const isConnected = useIsConnected()
   const remoteUsers = useRemoteUsers()
-  const { videoTracks: remoteVideoTracks } = useRemoteVideoTracks(remoteUsers)
 
   const myProfile = useJoin(
     {
@@ -54,9 +57,16 @@ export const CallRoomPage = () => {
   )
 
   const createCallToken = async () => {
+    console.log(pusherChannel, socketId)
+
+    if (!pusherChannel || !socketId) return
     try {
-      if (!room) return
-      const data = await RoomService.getCallInfo(room.id)
+      const payload: GetCallInfoPayload = {
+        roomId: room.id,
+        channelName: room.id,
+        socketId,
+      }
+      const data = await RoomService.getCallInfo(payload)
       setCallInfo(data)
       setCalling(true)
     } catch (error: any) {
@@ -64,10 +74,23 @@ export const CallRoomPage = () => {
     }
   }
 
-  useEffect(() => {
-    if (!room) return
-    createCallToken()
-  }, [room])
+  const toggleCamera = (isOpen: boolean) => {
+    setIsCameraOn(isOpen)
+    if (isOpen) {
+      setIsScreenShareOn(false)
+    }
+  }
+
+  const toggleMic = (isOpen: boolean) => {
+    setIsMicOn(isOpen)
+  }
+
+  const toggleScreenShare = (isOpen: boolean) => {
+    setIsScreenShareOn(isOpen)
+    if (isOpen) {
+      setIsCameraOn(false)
+    }
+  }
 
   useEffect(() => {
     if (cameraTrackError) {
@@ -100,56 +123,71 @@ export const CallRoomPage = () => {
   }, [myProfile.error])
 
   useEffect(() => {
+    if (!pusherChannel || !socketId) return
+    createCallToken()
+    pusherChannel.bind('pusher:subscription_succeeded', (member: any) => {
+      console.log('subscription_succeeded', member)
+    })
+    pusherChannel.bind('pusher:member_added', (member: any) => {
+      console.log('pusher:member_removed', member)
+    })
+    pusherChannel.bind('pusher:member_removed', (member: any) => {
+      console.log('pusher:member_removed', member)
+    })
+  }, [pusherChannel, socketId])
+
+  useEffect(() => {
+    setPusherChannel(subscribeToChannel(`presence-${room.id}`))
+
     return () => {
       setCalling(false)
+      unsubscribeFromChannel(room.id)
     }
   }, [])
 
   return (
-    <div className="flex size-full flex-col items-center justify-center gap-5 bg-foreground p-5 text-primary-foreground">
+    <div className="flex size-full flex-col items-center justify-center gap-5 bg-background p-5 text-foreground">
       {isConnected ? (
         <>
           <div className="flex flex-1 items-center justify-center overflow-y-auto">
             <div className="flex flex-wrap items-center justify-center gap-5">
-              {isScreenShareOn && !isLoadingScreenTrack && (
+              {isScreenShareOn && !isLoadingScreenTrack ? (
                 <div className="h-fit cursor-pointer space-y-4 text-center">
-                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border shadow">
+                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border border-primary shadow">
                     <LocalVideoTrack track={localScreenTrack} play />
                   </div>
                   <p>{userProfile?.fullName}</p>
                 </div>
-              )}
-              {remoteVideoTracks.map(videoTrack => (
-                <div
-                  className="h-fit cursor-pointer space-y-4 text-center"
-                  key={videoTrack.getUserId()}
-                >
-                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border shadow">
-                    <RemoteVideoTrack track={videoTrack} play />
-                  </div>
-                  <p>{videoTrack.getUserId()}</p>
-                </div>
-              ))}
-              <div className="h-fit cursor-pointer space-y-4 text-center">
-                <div className="aspect-video w-[300px] overflow-hidden rounded-xl border shadow">
-                  <LocalUser
-                    playAudio={false}
-                    cameraOn={isCameraOn}
-                    micOn={isMicOn}
-                    cover={userProfile?.avatarUrl ?? UserAvatarDefault}
-                  />
-                </div>
-                <p>{userProfile?.fullName}</p>
-              </div>
-              {remoteUsers.map(user => (
-                <div className="h-fit cursor-pointer space-y-4 text-center" key={user.uid}>
-                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border shadow">
-                    <RemoteUser
-                      cover="https://bing.biturl.top?resolution=1366&format=image&index=random"
-                      user={user}
+              ) : (
+                <div className="h-fit cursor-pointer space-y-4 text-center">
+                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border border-primary shadow">
+                    <LocalUser
+                      playAudio={false}
+                      cameraOn={isCameraOn}
+                      micOn={isMicOn}
+                      cover={userProfile?.avatarUrl ?? UserAvatarDefault}
+                      videoTrack={localCameraTrack}
                     />
                   </div>
-                  <p>{user.uid}</p>
+                  <p>{userProfile?.fullName}</p>
+                </div>
+              )}
+              {remoteUsers.map(user => (
+                <div className="h-fit cursor-pointer space-y-4 text-center" key={user.uid}>
+                  <div className="aspect-video w-[300px] overflow-hidden rounded-xl border border-primary shadow">
+                    {user.videoTrack ? (
+                      <RemoteVideoTrack track={user.videoTrack} play />
+                    ) : (
+                      <RemoteUser
+                        cover={
+                          remoteUserInfos.find(u => u.uid == user.uid)?.avatarUrl ??
+                          UserAvatarDefault
+                        }
+                        user={user}
+                      />
+                    )}
+                  </div>
+                  <p>{remoteUserInfos.find(u => u.uid == user.uid)?.fullName ?? user.uid}</p>
                 </div>
               ))}
             </div>
@@ -157,31 +195,31 @@ export const CallRoomPage = () => {
           <div className="flex justify-center gap-5">
             <AppTooltip content={isCameraOn ? 'Tắt Máy ảnh' : 'Bật Máy Ảnh'} asChild>
               <Button
-                className={cn('size-14 rounded-full', !isCameraOn && 'border')}
+                className={cn('size-14 rounded-full border border-primary')}
                 variant={isCameraOn ? 'secondary' : 'default'}
-                onClick={() => setIsCameraOn(prev => !prev)}
+                onClick={() => toggleCamera(!isCameraOn)}
               >
                 {isCameraOn ? <Video className="size-6" /> : <VideoOff className="size-6" />}
               </Button>
             </AppTooltip>
             <AppTooltip content={isScreenShareOn ? 'Ngừng Chia Sẻ' : 'Chia Sẻ Màn Hình'} asChild>
               <Button
-                className={cn('size-14 rounded-full', !isScreenShareOn && 'border')}
+                className={cn('size-14 rounded-full border border-primary')}
                 variant={isScreenShareOn ? 'secondary' : 'default'}
-                onClick={() => setIsScreenShareOn(prev => !prev)}
+                onClick={() => toggleScreenShare(!isScreenShareOn)}
               >
                 {isScreenShareOn ? (
-                  <MonitorOff className="size-6" />
-                ) : (
                   <MonitorUp className="size-6" />
+                ) : (
+                  <MonitorOff className="size-6" />
                 )}
               </Button>
             </AppTooltip>
             <AppTooltip content={isMicOn ? 'Tắt Micro' : 'Bật Micro'} asChild>
               <Button
-                className={cn('size-14 rounded-full', !isMicOn && 'border')}
+                className={cn('size-14 rounded-full border border-primary')}
                 variant={isMicOn ? 'secondary' : 'default'}
-                onClick={() => setIsMicOn(prev => !prev)}
+                onClick={() => toggleMic(!isMicOn)}
               >
                 {isMicOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
               </Button>

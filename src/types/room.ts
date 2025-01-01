@@ -16,6 +16,19 @@ export type TCallInfo = {
   uid: number
 }
 
+export type TRemoteUserInfo = {
+  uid: string | number
+  id: string
+  fullName: string
+  avatarUrl: string
+}
+
+export type GetCallInfoPayload = {
+  roomId: string
+  channelName: string
+  socketId: string
+}
+
 export type TCreateRoomSchema = yup.InferType<typeof createRoomSchema>
 
 export type CreateRoomPayload = TCreateRoomSchema & {

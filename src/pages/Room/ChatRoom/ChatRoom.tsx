@@ -131,7 +131,9 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
     if (!pusherChannel) return
     bindEventToChannel(room.id, 'new-message', (data: TMessage) => {
       if (data.sender.id === userProfile?.id) return
-      getAllMessages()
+      setTimeout(() => {
+        getAllMessages()
+      }, 1000)
     })
   }, [pusherChannel])
 

@@ -3,7 +3,7 @@ import { Dispatch, useCallback, useEffect, useRef } from 'react'
 
 import { displayError } from '@/helpers'
 
-export const useScreenTrack = (
+export const useScreenShareTrack = (
   ready: boolean,
   setReady: Dispatch<React.SetStateAction<boolean>>,
   screenVideoTrackInitConfig: ScreenVideoTrackInitConfig,

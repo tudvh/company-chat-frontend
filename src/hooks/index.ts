@@ -1,6 +1,4 @@
+export * from './agora-rtc'
 export * from './use-channel-detail'
 export * from './use-channels'
 export * from './use-room-detail'
-export * from './use-camera-track'
-export * from './use-microphone-track'
-export * from './use-screen-track'
