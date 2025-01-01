@@ -14,7 +14,7 @@ export const RoomPage = () => {
   }
 
   if (room.type === RoomTypeEnum.Call) {
-    return <CallRoomPage />
+    return <CallRoomPage room={room} />
   }
 
   if (room.type === RoomTypeEnum.Chat) {
