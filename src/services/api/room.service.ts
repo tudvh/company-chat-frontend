@@ -1,4 +1,4 @@
-import { CreateRoomPayload, GetCallInfoPayload, TCallInfo, TRoom } from '@/types'
+import { CreateRoomPayload, TCallInfo, TRoom } from '@/types'
 import apiClient from './api-client'
 
 const path = '/rooms'
@@ -9,8 +9,8 @@ export class RoomService {
     return data
   }
 
-  public static async getCallInfo(payload: GetCallInfoPayload): Promise<TCallInfo> {
-    const { data } = await apiClient.post(`${path}/call-info`, payload)
+  public static async getCallInfo(roomId: string): Promise<TCallInfo> {
+    const { data } = await apiClient.post(`${path}/${roomId}/call-info`)
     return data
   }
 
