@@ -71,7 +71,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
       id: 2,
       label: 'Cài đặt máy chủ',
       icon: Settings,
-      to: '#',
+      to: ROUTES.CHANNEL_SETTING.INDEX.replace(':channelId', channel.id),
       type: 'link',
     },
     {

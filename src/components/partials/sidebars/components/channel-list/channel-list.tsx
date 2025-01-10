@@ -1,12 +1,11 @@
 import { Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 
 import { AppLogo } from '@/assets/images'
 import { AppDialog, AppTooltip } from '@/components/ui'
 import { ROUTES } from '@/configs'
 import { useAuth } from '@/contexts'
-import { displayError } from '@/helpers'
 import { useChannels } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { ChannelCreate } from './channel-create'
@@ -14,17 +13,10 @@ import { ChannelCreate } from './channel-create'
 export const ChannelList = () => {
   const { userProfile } = useAuth()
   const { channelId } = useParams()
-  const { channels, error: channelsError } = useChannels(userProfile?.id)
+  const { channels } = useChannels(userProfile?.id)
   const [isModalOpen, setModalOpen] = useState(false)
   const location = useLocation()
   const pathName = location.pathname
-
-  useEffect(() => {
-    if (channelsError) {
-      displayError(channelsError)
-      console.error('Error fetching my channels:', channelsError)
-    }
-  }, [channelsError])
 
   return (
     <div className="thread-scroll h-full overflow-y-auto bg-primary/10 pr-2">
