@@ -85,7 +85,7 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
   }
 
   useEffect(() => {
-    if (cameraTrackError) {
+    if (microphoneTrackError) {
       setIsMicOn(false)
       displayError(microphoneTrackError)
     }
@@ -119,19 +119,21 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
 
     pusherChannel.bind('pusher:subscription_succeeded', (member: Members) => {
       console.log('pusher:subscription_succeeded', member)
-      const remoteUserInfos = Object.keys(member.members)
+      const newRemoteUserInfos = Object.keys(member.members)
         .filter(key => key !== member.me.id)
         .reduce((obj: any, key) => {
           obj[key] = member.members[key]
           return obj
         }, {})
-      setRemoteUserInfos(remoteUserInfos)
+      setRemoteUserInfos(newRemoteUserInfos)
     })
     pusherChannel.bind('pusher:member_added', (member: TPusherEventMember) => {
       console.log('pusher:member_added', member)
-      const newRemoteUserInfos = { ...remoteUserInfos }
-      newRemoteUserInfos[member.id] = member.info
-      setRemoteUserInfos(newRemoteUserInfos)
+      setRemoteUserInfos(prev => {
+        const newRemoteUserInfos = { ...prev }
+        newRemoteUserInfos[member.id] = member.info
+        return newRemoteUserInfos
+      })
     })
     pusherChannel.bind('pusher:member_removed', (member: TPusherEventMember) => {
       console.log('pusher:member_removed', member)
@@ -144,7 +146,7 @@ export const CallRoomPage = ({ room }: CallRoomPageProps) => {
     return () => {
       unsubscribeFromChannel(`presence-${room.id}`)
     }
-  }, [calling])
+  }, [calling, room.id])
 
   useEffect(() => {
     createCallToken()
