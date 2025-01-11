@@ -27,3 +27,8 @@ export type TCreateChannelSchema = yup.InferType<typeof createChannelSchema>
 export type CreateChannelPayload = TCreateChannelSchema & {
   thumbnailFile: File | null
 }
+
+export type UpdateInfoChannelPayload = {
+  logo: File | null
+  name: string
+}
