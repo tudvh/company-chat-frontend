@@ -1,3 +1,111 @@
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { useChannelDetail } from '@/hooks'
+import { ChannelService } from '@/services/api'
+import { ToastUtil } from '@/utils'
+
 export const ChannelSettingGeneralPage = () => {
-  return <h1 className="text-xl font-bold">Tổng quan về máy chủ</h1>
+  const { channelId } = useParams()
+  const { channelDetail, invalidateChannelDetail } = useChannelDetail(channelId)
+  const [nameChannel, setNameChannel] = useState<string>('')
+  const [logo, setLogo] = useState<File>()
+  const [previewUrl, setPreviewUrl] = useState<string>('')
+
+  useEffect(() => {
+    if (channelDetail?.name) {
+      setNameChannel(channelDetail.name)
+    }
+  }, [channelDetail])
+
+  useEffect(() => {
+    if (logo) {
+      const url = URL.createObjectURL(logo)
+      setPreviewUrl(url)
+      return () => URL.revokeObjectURL(url)
+    }
+  }, [logo])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files[0]) {
+      setLogo(files[0])
+    }
+  }
+
+  const update = async () => {
+    const formData = new FormData()
+    if (logo) {
+      formData.append('logo', logo)
+    }
+    formData.append('name', nameChannel)
+    try{
+      if(channelId){
+        await ChannelService.updateInfo(channelId, formData)
+        ToastUtil.success('Cập nhật thông tin máy chủ thành công')
+        invalidateChannelDetail()
+      }
+    }catch(err){
+      ToastUtil.error('Có lỗi! Thử lại sau')
+    }
+  }
+
+  return (
+    <div className="bg-white p-6">
+      <h1 className="mb-6 text-xl font-bold">Tổng quan về máy chủ</h1>
+
+      <div className="flex items-start gap-6">
+        <div className="relative">
+          <label
+            htmlFor="file-upload"
+            className="group relative block h-24 w-24 cursor-pointer overflow-hidden rounded-full bg-gray-100"
+          >
+            <img
+              src={previewUrl || channelDetail?.thumbnailUrl || '/api/placeholder/96/96'}
+              className="absolute z-40 h-full w-full object-cover"
+            />
+            <div className="z-41 absolute flex h-full w-full items-center justify-center bg-black/30 p-4 text-center opacity-0 transition-opacity delay-75 ease-in group-hover:opacity-100">
+              Thay đổi biểu tượng
+            </div>
+          </label>
+          <label
+            htmlFor="file-upload"
+            className="z-42 absolute bottom-0 right-0 cursor-pointer rounded-full bg-gray-100 p-2 text-xl hover:bg-gray-200"
+          >
+            📸
+          </label>
+        </div>
+
+        <div className="flex-1">
+          <div className="mb-4">
+            <label className="mb-1 block text-sm font-medium text-gray-700">TÊN MÁY CHỦ</label>
+            <input
+              type="text"
+              value={nameChannel}
+              onChange={e => setNameChannel(e.target.value)}
+              className="w-full rounded-md border border-gray-300 p-2"
+            />
+          </div>
+
+          <div className="text-sm text-gray-600">
+            Chúng tôi khuyến bạn nên sử dụng hình ảnh có kích thước tối thiểu 512x512 cho máy chủ.
+          </div>
+
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="hidden"
+            id="file-upload"
+            accept="image/*"
+          />
+
+          <button
+            className="mt-4 inline-block cursor-pointer rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+            onClick={() => update()}
+          >
+            Lưu thay đổi
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }

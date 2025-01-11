@@ -42,4 +42,13 @@ export class ChannelService {
   public static async leaveChannel(channelId: string): Promise<void> {
     await apiClient.post(`${path}/${channelId}/leave`)
   }
+
+  public static async updateInfo(channelId: string, payload: any): Promise<void>{
+    const { data } = await apiClient.post(`${path}/${channelId}/update`, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return data
+  }
 }
