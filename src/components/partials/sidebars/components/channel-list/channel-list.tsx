@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { LogOut, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import { ChannelCreate } from './channel-create'
 
 export const ChannelList = () => {
-  const { userProfile } = useAuth()
+  const { userProfile, logoutUser } = useAuth()
   const { channelId } = useParams()
   const { channels } = useChannels(userProfile?.id)
   const [isModalOpen, setModalOpen] = useState(false)
@@ -78,6 +78,18 @@ export const ChannelList = () => {
               onClick={() => setModalOpen(true)}
             >
               <Plus size={24} />
+            </button>
+          </div>
+        </AppTooltip>
+        {/* Logout button */}
+        <AppTooltip position="right" content="Đăng xuất" asChild>
+          <div className="flex gap-1.5">
+            <div className="h-12 w-1 bg-transparent" />
+            <button
+              className="flex size-12 items-center justify-center overflow-hidden rounded-full bg-background p-2 text-red-600 transition duration-200 hover:rounded-xl active:translate-y-0.5"
+              onClick={logoutUser}
+            >
+              <LogOut size={24} />
             </button>
           </div>
         </AppTooltip>

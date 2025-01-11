@@ -57,7 +57,21 @@ export const ChannelRolePermission = ({ channelRole }: ChannelRolePermissionProp
   return (
     <div className="px-2">
       <div className="flex justify-between border-b py-5">
-        <p>Gửi tin nhắn</p>
+        <p>Cài đặt máy chủ</p>
+        <Switch
+          checked={permissions.includes(PermissionEnum.SettingChannel)}
+          onCheckedChange={isSet => handleSetPermissions(PermissionEnum.SettingChannel, isSet)}
+        />
+      </div>
+      <div className="flex justify-between border-b py-5">
+        <p>Tạo các kênh trong máy chủ</p>
+        <Switch
+          checked={permissions.includes(PermissionEnum.CreateRoom)}
+          onCheckedChange={isSet => handleSetPermissions(PermissionEnum.CreateRoom, isSet)}
+        />
+      </div>
+      <div className="flex justify-between border-b py-5">
+        <p>Gửi tin nhắn trong máy chủ</p>
         <Switch
           checked={permissions.includes(PermissionEnum.SendMessage)}
           onCheckedChange={isSet => handleSetPermissions(PermissionEnum.SendMessage, isSet)}
@@ -70,13 +84,7 @@ export const ChannelRolePermission = ({ channelRole }: ChannelRolePermissionProp
           onCheckedChange={isSet => handleSetPermissions(PermissionEnum.Invite, isSet)}
         />
       </div>
-      <div className="flex justify-between border-b py-5">
-        <p>Tạo các kênh</p>
-        <Switch
-          checked={permissions.includes(PermissionEnum.CreateRoom)}
-          onCheckedChange={isSet => handleSetPermissions(PermissionEnum.CreateRoom, isSet)}
-        />
-      </div>
+
       <div className="flex justify-end py-5">
         <Button onClick={onSubmit}>Lưu thay đổi</Button>
       </div>

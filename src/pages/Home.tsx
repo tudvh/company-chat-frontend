@@ -21,6 +21,7 @@ export const HomePage = () => {
   useEffect(() => {
     if (!channels) return
     const channelId = channels[0]?.id
+    if (!channelId) return
     navigate(ROUTES.CHANNEL.replace(':channelId', channelId))
   }, [channels])
 

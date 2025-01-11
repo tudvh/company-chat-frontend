@@ -1,11 +1,14 @@
 import { FileIcon, Plus, SendIcon, X } from 'lucide-react'
 import { Channel } from 'pusher-js'
-import { KeyboardEvent, useEffect, useRef, useState } from 'react'
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import { SharpIcon } from '@/components/icons'
 import { Button, Textarea } from '@/components/ui'
 import { useAuth, usePusher } from '@/contexts'
+import { PermissionEnum } from '@/enums'
 import { displayError } from '@/helpers'
+import { useChannelDetail, useChannelUserPermissions } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { MessageService } from '@/services/api'
 import { TMessage, TRoom } from '@/types'
@@ -19,6 +22,9 @@ interface ChatRoomPageProps {
 export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
   const { subscribeToChannel, unsubscribeFromChannel, bindEventToChannel } = usePusher()
   const { userProfile } = useAuth()
+  const { channelId } = useParams()
+  const { channelDetail } = useChannelDetail(channelId)
+  const { channelUserPermissions } = useChannelUserPermissions(channelId)
   const [messages, setMessages] = useState<TMessage[]>([])
   const [content, setContent] = useState('')
   const [files, setFiles] = useState<File[]>([])
@@ -26,6 +32,17 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [isSendingMessage, setIsSendingMessage] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const hasSendMessagePermission = useMemo(() => {
+    return channelUserPermissions?.includes(PermissionEnum.SendMessage)
+  }, [channelUserPermissions])
+
+  const isDisabledChat = useMemo(() => {
+    if (isSendingMessage) return true
+    if (channelDetail?.isCreator) return false
+    if (hasSendMessagePermission) return false
+    return true
+  }, [isSendingMessage, channelDetail, hasSendMessagePermission])
 
   const getAllMessages = async () => {
     try {
@@ -214,7 +231,7 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
                   htmlFor="file-upload"
                   className={cn(
                     'cursor-pointer',
-                    isSendingMessage && 'pointer-events-none opacity-50',
+                    isDisabledChat && 'pointer-events-none opacity-50',
                   )}
                 >
                   <Plus />
@@ -228,13 +245,13 @@ export const ChatRoomPage = ({ room }: ChatRoomPageProps) => {
                   className="h-10 min-h-10 resize-none overflow-hidden break-all rounded-sm bg-transparent px-0 py-[9px] !text-base focus-visible:ring-0 focus-visible:ring-offset-0"
                   rows={1}
                   value={content}
-                  disabled={isSendingMessage}
+                  disabled={isDisabledChat}
                   onChange={e => setContent(e.target.value)}
                   onKeyDown={handleKeyDown}
                 />
               </div>
             </div>
-            <Button onClick={handleSendMessage} disabled={isSendingMessage}>
+            <Button onClick={handleSendMessage} disabled={isDisabledChat}>
               <SendIcon />
             </Button>
           </div>

@@ -5,6 +5,7 @@ export type TChannelRole = {
   id: string
   name: string
   createdAt: string
+  channelUsersLength: number
 }
 
 export type TChannelRoleDetail = {
