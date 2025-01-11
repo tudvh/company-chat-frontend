@@ -7,7 +7,6 @@ import { useLoading } from '@/contexts'
 import { displayError } from '@/helpers'
 import { ChannelRoleService } from '@/services/api'
 import { GetChannelRolesRequest, TChannelRole } from '@/types'
-import { Trash } from 'lucide-react'
 
 export const ChannelSettingRolePage = () => {
   const [channelRoles, setChannelRoles] = useState<TChannelRole[]>([])
@@ -68,7 +67,6 @@ export const ChannelSettingRolePage = () => {
             <tr>
               <th className="px-2 py-3 text-left">Vai trò - {channelRoles.length}</th>
               <th className="px-2 py-3">Thành viên</th>
-              <th className="px-2 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -79,12 +77,7 @@ export const ChannelSettingRolePage = () => {
                 onClick={() => navigateToUpdatePage(channelRole.id)}
               >
                 <td className="px-2 py-3 text-left">{channelRole.name}</td>
-                <td className="px-2 py-3">0</td>
-                <td className="px-2 py-3">
-                  <Button variant="destructive">
-                    <Trash className="size-5" />
-                  </Button>
-                </td>
+                <td className="px-2 py-3">{channelRole.channelUsersLength}</td>
               </tr>
             ))}
           </tbody>

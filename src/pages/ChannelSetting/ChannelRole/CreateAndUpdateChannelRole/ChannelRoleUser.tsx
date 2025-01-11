@@ -18,17 +18,10 @@ export const ChannelRoleUser = () => {
   const [availableChannelUsers, channelRoleUsers] = useMemo(() => {
     if (!channelUsers?.length) return [[], []]
 
-    const creator = channelUsers.find(user => user.isCreator)
-    const channelRoleUsers = [
-      ...(creator ? [creator] : []),
-      ...channelUsers.filter(user => channelRoleUserIds?.includes(user.id)),
-    ]
-
-    const availableChannelUsers = channelUsers.filter(user => {
-      if (user.isCreator) return false
-      if (channelRoleUserIds?.includes(user.id)) return false
-      return true
-    })
+    const channelRoleUsers = channelUsers.filter(user => channelRoleUserIds?.includes(user.id))
+    const availableChannelUsers = channelUsers.filter(
+      user => !channelRoleUserIds?.includes(user.id),
+    )
 
     return [availableChannelUsers, channelRoleUsers]
   }, [channelUsers, channelRoleUserIds])
@@ -96,16 +89,14 @@ export const ChannelRoleUser = () => {
                     className="aspect-square size-10 rounded-full object-contain"
                   />
                   <p className="flex-1">{user.fullName}</p>
-                  {!user.isCreator && (
-                    <Button
-                      onClick={() => {
-                        handleRemoveUser(user.id)
-                      }}
-                      className="flex size-6 items-center justify-center rounded-full p-0"
-                    >
-                      <X className="size-3" />
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => {
+                      handleRemoveUser(user.id)
+                    }}
+                    className="flex size-6 items-center justify-center rounded-full p-0"
+                  >
+                    <X className="size-3" />
+                  </Button>
                 </div>
               ))
             : 'Không có thành viên nào'}

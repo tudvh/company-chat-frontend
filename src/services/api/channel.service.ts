@@ -1,3 +1,4 @@
+import { PermissionEnum } from '@/enums'
 import {
   CreateChannelPayload,
   JoinChannelPayload,
@@ -55,6 +56,11 @@ export class ChannelService {
 
   public static async getChannelUsers(channelId: string): Promise<TRoleUser[]> {
     const { data } = await apiClient.get(`${path}/${channelId}/users`)
+    return data
+  }
+
+  public static async getChannelUserPermissions(channelId: string): Promise<PermissionEnum[]> {
+    const { data } = await apiClient.get(`${path}/${channelId}/user-permissions`)
     return data
   }
 }

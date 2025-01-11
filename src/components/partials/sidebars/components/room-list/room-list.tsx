@@ -1,12 +1,12 @@
 import { ChevronDown, Plus, Volume2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { SharpIcon } from '@/components/icons'
 import { AppDialog, AppTooltip } from '@/components/ui'
 import { ROUTES } from '@/configs'
-import { RoomTypeEnum } from '@/enums'
-import { useChannelDetail, useRoomDetail } from '@/hooks'
+import { PermissionEnum, RoomTypeEnum } from '@/enums'
+import { useChannelDetail, useChannelUserPermissions, useRoomDetail } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { TGroup } from '@/types'
 import { MenuDropdown } from '../channel-menu-dropdown'
@@ -15,8 +15,14 @@ import { RoomCreate } from './room-craete'
 export const RoomList = () => {
   const { channelId, roomId } = useParams()
   const { channelDetail } = useChannelDetail(channelId)
+  const { channelUserPermissions } = useChannelUserPermissions(channelId)
   const { updateRoom } = useRoomDetail()
   const [selectedGroup, setSelectedGroup] = useState<TGroup | null>(null)
+
+  const hasCreateRoomPermission = useMemo(() => {
+    if (channelDetail?.isCreator) return true
+    return channelUserPermissions?.includes(PermissionEnum.CreateRoom)
+  }, [channelUserPermissions, channelDetail])
 
   useEffect(() => {
     if (!channelDetail) return
@@ -40,11 +46,13 @@ export const RoomList = () => {
                     <ChevronDown className="size-3.5" />
                     <span className="line-clamp-1 break-all text-xs uppercase">{group.name}</span>
                   </div>
-                  <AppTooltip asChild content="Tạo kênh">
-                    <button className="px-1" onClick={() => setSelectedGroup(group)}>
-                      <Plus size={16} />
-                    </button>
-                  </AppTooltip>
+                  {hasCreateRoomPermission && (
+                    <AppTooltip asChild content="Tạo kênh">
+                      <button className="px-1" onClick={() => setSelectedGroup(group)}>
+                        <Plus size={16} />
+                      </button>
+                    </AppTooltip>
+                  )}
                 </div>
                 {group.rooms.map(room => {
                   const isActive = roomId === room.id

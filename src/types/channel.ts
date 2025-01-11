@@ -8,6 +8,7 @@ export type TChannel = {
   description: string | null
   thumbnailUrl: string | null
   createdAt: string
+  isCreator: boolean
 }
 
 export type TChannelDetail = TChannel & {

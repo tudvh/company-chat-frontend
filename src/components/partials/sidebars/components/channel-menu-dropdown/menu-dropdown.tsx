@@ -1,6 +1,6 @@
 import { ChevronDown, Settings, SquarePlus, UserRoundPlus } from 'lucide-react'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { LeaveIcon } from '@/components/icons'
 import {
@@ -12,14 +12,15 @@ import {
 } from '@/components/ui'
 import { ROUTES } from '@/configs'
 import { useAuth, useLoading } from '@/contexts'
+import { PermissionEnum } from '@/enums'
 import { displayError } from '@/helpers'
+import { useChannelDetail, useChannels, useChannelUserPermissions } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { ChannelService } from '@/services/api'
 import { TChannelDetail } from '@/types'
 import { AlertUtil, ToastUtil } from '@/utils'
 import { GroupCreate } from './group-create'
 import { InviteCreate } from './invite-create'
-import { useChannels } from '@/hooks'
 
 interface MenuDropdownProps {
   channel: TChannelDetail
@@ -27,11 +28,29 @@ interface MenuDropdownProps {
 
 export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
   const { showLoading, hideLoading } = useLoading()
+  const { channelId } = useParams()
   const { userProfile } = useAuth()
   const { invalidateChannels } = useChannels(userProfile?.id)
+  const { channelDetail } = useChannelDetail(channelId)
+  const { channelUserPermissions } = useChannelUserPermissions(channelId)
   const [isModalInviteOpen, setModalInviteOpen] = useState(false)
   const [isModalGroupOpen, setModalGroupOpen] = useState(false)
   const navigate = useNavigate()
+
+  const hasCreateRoomPermission = useMemo(() => {
+    if (channelDetail?.isCreator) return true
+    return channelUserPermissions?.includes(PermissionEnum.CreateRoom)
+  }, [channelUserPermissions, channelDetail])
+
+  const hasInvitePermission = useMemo(() => {
+    if (channelDetail?.isCreator) return true
+    return channelUserPermissions?.includes(PermissionEnum.Invite)
+  }, [channelUserPermissions, channelDetail])
+
+  const hasSettingChannelPermission = useMemo(() => {
+    if (channelDetail?.isCreator) return true
+    return channelUserPermissions?.includes(PermissionEnum.SettingChannel)
+  }, [channelUserPermissions, channelDetail])
 
   const confirmLeaveChannel = async () => {
     const result = await AlertUtil.confirm({
@@ -66,6 +85,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
       icon: UserRoundPlus,
       onClick: () => setModalInviteOpen(true),
       type: 'button',
+      isShow: hasInvitePermission,
     },
     {
       id: 2,
@@ -73,6 +93,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
       icon: Settings,
       to: ROUTES.CHANNEL_SETTING.INDEX.replace(':channelId', channel.id),
       type: 'link',
+      isShow: hasSettingChannelPermission,
     },
     {
       id: 3,
@@ -82,6 +103,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
         setModalGroupOpen(true)
       },
       type: 'button',
+      isShow: hasCreateRoomPermission,
     },
     {
       id: 4,
@@ -90,6 +112,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
       onClick: confirmLeaveChannel,
       type: 'button',
       variant: 'destructive',
+      isShow: true,
     },
   ]
 
@@ -103,7 +126,7 @@ export const MenuDropdown = ({ channel }: MenuDropdownProps) => {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
-          {DROPDOWN_ITEMS.map(item => {
+          {DROPDOWN_ITEMS.filter(item => item.isShow).map(item => {
             const Icon = item.icon
             const className = cn(
               'flex w-full cursor-pointer items-center justify-between',
