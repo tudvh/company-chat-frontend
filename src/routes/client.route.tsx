@@ -5,10 +5,11 @@ import {
   ChannelPage,
   ChannelSettingGeneralPage,
   ChannelSettingRolePage,
-  CreateChannelSettingRolePage,
+  CreateChannelRolePage,
   HomePage,
   JoinChannel,
   RoomPage,
+  UpdateChannelRolePage,
 } from '@/pages'
 import { LoginPage } from '@/pages/Auth'
 
@@ -48,7 +49,11 @@ const clientRoute = [
       },
       {
         path: ROUTES.CHANNEL_SETTING.ROLE.CREATE,
-        element: <CreateChannelSettingRolePage />,
+        element: <CreateChannelRolePage />,
+      },
+      {
+        path: ROUTES.CHANNEL_SETTING.ROLE.UPDATE,
+        element: <UpdateChannelRolePage />,
       },
     ],
   },

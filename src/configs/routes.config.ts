@@ -10,7 +10,7 @@ export const ROUTES = {
     ROLE: {
       INDEX: '/channels/:channelId/settings/roles',
       CREATE: '/channels/:channelId/settings/roles/create',
-      UPDATE: '/channels/:channelId/settings/roles/:roleId',
+      UPDATE: '/channels/:channelId/settings/roles/:channelRoleId',
     },
   },
   ROOM: '/channels/:channelId/:roomId',

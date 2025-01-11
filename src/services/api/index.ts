@@ -1,5 +1,6 @@
 export { default as apiClient } from './api-client'
 export * from './auth.service'
+export * from './channel-role.service'
 export * from './channel.service'
 export * from './group.service'
 export * from './health-check.service'
