@@ -1,2 +1,2 @@
 export * from './ChannelSettingGeneral'
-export * from './ChannelSettingRole'
+export * from './ChannelRole'

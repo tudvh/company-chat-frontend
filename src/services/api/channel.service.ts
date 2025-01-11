@@ -4,6 +4,7 @@ import {
   TChannel,
   TChannelDetail,
   TChannelInvite,
+  TRoleUser,
 } from '@/types'
 import apiClient from './api-client'
 
@@ -43,12 +44,17 @@ export class ChannelService {
     await apiClient.post(`${path}/${channelId}/leave`)
   }
 
-  public static async updateInfo(channelId: string, payload: any): Promise<void>{
+  public static async updateInfo(channelId: string, payload: any): Promise<void> {
     const { data } = await apiClient.post(`${path}/${channelId}/update`, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
+    return data
+  }
+
+  public static async getChannelUsers(channelId: string): Promise<TRoleUser[]> {
+    const { data } = await apiClient.get(`${path}/${channelId}/users`)
     return data
   }
 }

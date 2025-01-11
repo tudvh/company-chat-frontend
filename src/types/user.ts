@@ -16,3 +16,10 @@ export type TMessageUser = {
   fullName: string
   avatarUrl: string | null
 }
+
+export type TRoleUser = {
+  id: string
+  fullName: string
+  avatarUrl: string | null
+  isCreator?: boolean
+}

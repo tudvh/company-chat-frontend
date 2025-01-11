@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './channel'
+export * from './channel-role'
 export * from './common'
 export * from './group'
 export * from './message'

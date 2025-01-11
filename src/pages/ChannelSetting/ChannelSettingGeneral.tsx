@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+
+import { displayError } from '@/helpers'
 import { useChannelDetail } from '@/hooks'
 import { ChannelService } from '@/services/api'
 import { ToastUtil } from '@/utils'
@@ -38,14 +40,14 @@ export const ChannelSettingGeneralPage = () => {
       formData.append('logo', logo)
     }
     formData.append('name', nameChannel)
-    try{
-      if(channelId){
+    try {
+      if (channelId) {
         await ChannelService.updateInfo(channelId, formData)
         ToastUtil.success('Cập nhật thông tin máy chủ thành công')
         invalidateChannelDetail()
       }
-    }catch(err){
-      ToastUtil.error('Có lỗi! Thử lại sau')
+    } catch (err) {
+      displayError(err)
     }
   }
 
