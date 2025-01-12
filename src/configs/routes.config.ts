@@ -12,6 +12,7 @@ export const ROUTES = {
       CREATE: '/channels/:channelId/settings/roles/create',
       UPDATE: '/channels/:channelId/settings/roles/:channelRoleId',
     },
+    USER: '/channels/:channelId/settings/users',
   },
   ROOM: '/channels/:channelId/:roomId',
 }

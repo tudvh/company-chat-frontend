@@ -24,6 +24,12 @@ export const ChannelSettingSidebar = ({ channelDetail }: ChannelSettingSidebarPr
       to: ROUTES.CHANNEL_SETTING.ROLE.INDEX.replace(':channelId', channelDetail.id),
       type: 'link',
     },
+    {
+      id: '3',
+      label: 'Người dùng',
+      to: ROUTES.CHANNEL_SETTING.USER.replace(':channelId', channelDetail.id),
+      type: 'link',
+    },
   ]
 
   return (

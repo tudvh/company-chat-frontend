@@ -1,3 +1,4 @@
+import { Camera } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -23,6 +24,7 @@ export const ChannelSettingGeneralPage = () => {
     if (logo) {
       const url = URL.createObjectURL(logo)
       setPreviewUrl(url)
+
       return () => URL.revokeObjectURL(url)
     }
   }, [logo])
@@ -52,28 +54,27 @@ export const ChannelSettingGeneralPage = () => {
   }
 
   return (
-    <div className="bg-white p-6">
+    <>
       <h1 className="mb-6 text-xl font-bold">Tổng quan về máy chủ</h1>
-
       <div className="flex items-start gap-6">
         <div className="relative">
           <label
             htmlFor="file-upload"
             className="group relative block h-24 w-24 cursor-pointer overflow-hidden rounded-full bg-gray-100"
           >
-            <img
-              src={previewUrl || channelDetail?.thumbnailUrl || '/api/placeholder/96/96'}
-              className="absolute z-40 h-full w-full object-cover"
-            />
-            <div className="z-41 absolute flex h-full w-full items-center justify-center bg-black/30 p-4 text-center opacity-0 transition-opacity delay-75 ease-in group-hover:opacity-100">
-              Thay đổi biểu tượng
+            {previewUrl || channelDetail?.thumbnailUrl ? (
+              <img
+                src={previewUrl || channelDetail?.thumbnailUrl || ''}
+                className="absolute z-[40] h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute z-[40] flex size-full items-center justify-center bg-muted text-2xl">
+                <p>{channelDetail?.name.charAt(0).toUpperCase()}</p>
+              </div>
+            )}
+            <div className="absolute z-[41] flex h-full w-full items-center justify-center bg-black/30 p-4 text-center opacity-0 transition-opacity delay-75 ease-in group-hover:opacity-100">
+              <Camera className="size-10 text-white" />
             </div>
-          </label>
-          <label
-            htmlFor="file-upload"
-            className="z-42 absolute bottom-0 right-0 cursor-pointer rounded-full bg-gray-100 p-2 text-xl hover:bg-gray-200"
-          >
-            📸
           </label>
         </div>
 
@@ -108,6 +109,6 @@ export const ChannelSettingGeneralPage = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

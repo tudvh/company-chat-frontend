@@ -5,6 +5,7 @@ import {
   ChannelPage,
   ChannelSettingGeneralPage,
   ChannelSettingRolePage,
+  ChannelSettingUserPage,
   CreateChannelRolePage,
   HomePage,
   JoinChannel,
@@ -54,6 +55,10 @@ const clientRoute = [
       {
         path: ROUTES.CHANNEL_SETTING.ROLE.UPDATE,
         element: <UpdateChannelRolePage />,
+      },
+      {
+        path: ROUTES.CHANNEL_SETTING.USER,
+        element: <ChannelSettingUserPage />,
       },
     ],
   },

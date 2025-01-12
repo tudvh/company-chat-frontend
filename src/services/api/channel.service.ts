@@ -63,4 +63,8 @@ export class ChannelService {
     const { data } = await apiClient.get(`${path}/${channelId}/user-permissions`)
     return data
   }
+
+  public static async removeUser(channelId: string, userId: string): Promise<void> {
+    await apiClient.delete(`${path}/${channelId}/users/${userId}`)
+  }
 }
